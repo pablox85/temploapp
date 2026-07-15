@@ -12,9 +12,9 @@ export type Database = {
   public: {
     Tables: {
       profiles: {
-        Row: { id: string; full_name: string; normalized_name: string; role: AppRole; created_at: string };
-        Insert: { id: string; full_name: string; normalized_name?: string; role?: AppRole; created_at?: string };
-        Update: { full_name?: string; normalized_name?: string; role?: AppRole };
+        Row: { id: string; full_name: string; role: AppRole; created_at: string };
+        Insert: { id: string; full_name: string; role?: AppRole; created_at?: string };
+        Update: { full_name?: string; role?: AppRole };
         Relationships: [];
       };
       items: {

@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { normalizedName } from "@/lib/auth/username";
 
 export const itemNameSchema = z
   .string()
@@ -15,17 +14,17 @@ export const personNameSchema = z
   .trim()
   .min(1, "Escribe tu nombre.")
   .max(120, "El nombre no puede superar los 120 caracteres.")
-  .transform((value) => value.replace(/\s+/g, " "))
-  .refine((value) => normalizedName(value).length > 0, "El nombre debe contener letras o números.");
+  .transform((value) => value.replace(/\s+/g, " "));
 
 export const loginSchema = z.object({
-  name: personNameSchema,
+  email: z.email("Escribe un email válido."),
   password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres."),
 });
 
 export const adminUserSchema = z
   .object({
     fullName: personNameSchema,
+    email: z.email("Escribe un email válido."),
     password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres."),
     confirmPassword: z.string(),
     role: z.enum(["user", "admin"], { message: "El rol seleccionado no es válido." }),

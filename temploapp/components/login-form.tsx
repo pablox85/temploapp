@@ -15,8 +15,8 @@ export function LoginForm({ redirectTo }: { redirectTo: string }) {
     <form action={action} className="space-y-5">
       <input type="hidden" name="redirectTo" value={redirectTo} />
       <div>
-        <label htmlFor="name" className="label text-slate-200">Nombre de usuario</label>
-        <input id="name" name="name" type="text" autoComplete="username" required maxLength={120} className="input border-slate-700 bg-slate-900 text-slate-100 placeholder:text-slate-500 hover:border-slate-600" placeholder="Ej. Juan Pérez" />
+        <label htmlFor="email" className="label text-slate-200">Email</label>
+        <input id="email" name="email" type="email" autoComplete="email" required className="input border-slate-700 bg-slate-900 text-slate-100 placeholder:text-slate-500 hover:border-slate-600" placeholder="sarasa@sarasa.com" />
       </div>
       <div>
         <label htmlFor="password" className="label text-slate-200">Contraseña</label>

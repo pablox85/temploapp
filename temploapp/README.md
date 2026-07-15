@@ -4,7 +4,7 @@ MVP de lista colaborativa construido con Next.js 16 (App Router), TypeScript, Ta
 
 ## Funcionalidad
 
-- Inicio de sesión con nombre de usuario único y contraseña, respaldado por Supabase Auth.
+- Inicio de sesión estándar con email y contraseña mediante Supabase Auth.
 - Lista global con búsqueda, contador de selecciones y selección múltiple.
 - Creación de ítems por cualquier usuario autenticado.
 - Normalización y prevención de duplicados en la base de datos.
@@ -74,53 +74,42 @@ supabase db push
 
 ### SQL Editor
 
-Copia el contenido de la migración en **SQL Editor** y ejecútalo una sola vez.
+Copia el contenido de cada migración en **SQL Editor** y ejecútalas una vez, respetando el orden de sus nombres.
 
 La migración crea:
 
 - `profiles`, `items` y `user_items`.
 - Enum `app_role` (`admin | user`).
-- `UNIQUE(normalized_name)` y `UNIQUE(user_id, item_id)`.
-- Trigger de normalización (trim, espacios consecutivos y minúsculas para `normalized_name`).
+- `UNIQUE(items.normalized_name)` y `UNIQUE(user_id, item_id)`.
+- Trigger de normalización de nombres de ítems para impedir duplicados.
 - Trigger de creación automática de perfiles y backfill de usuarios existentes.
-- Unicidad normalizada para nombres de usuario.
 - Índices, grants y todas las políticas RLS.
 
 ## Crear usuarios y el primer administrador
 
-Las personas usan únicamente su **nombre único** y contraseña en TemploAPP; no ven ni escriben un correo. Un administrador puede crear usuarios desde `Panel admin`; la acción valida la sesión contra `profiles`, crea la identidad interna mediante Supabase Admin y asigna el rol después de que el trigger cree el perfil. Si falla el perfil, elimina solo el usuario creado en esa ejecución.
+Las personas inician sesión con el email y la contraseña registrados en Supabase Auth. Un administrador puede crear usuarios desde `Panel admin`; la acción valida la sesión contra `profiles`, crea la cuenta mediante Supabase Admin y asigna el rol después de que el trigger cree el perfil. Si falla el perfil, elimina solo el usuario creado en esa ejecución.
 
-1. Genera el identificador técnico desde la carpeta del proyecto:
+Para crear la primera cuenta:
 
-   ```bash
-   npm run user:identifier -- "Juan Pérez"
-   ```
-
-   El resultado será legible y determinista:
-
-   ```text
-   juan.perez@temploapp.local
-   ```
-
-2. Ve a **Supabase → Authentication → Users → Add user → Create new user**.
-3. Pega el identificador generado como email, elige una contraseña y activa la confirmación automática.
-4. En **User metadata**, agrega:
+1. Ve a **Supabase → Authentication → Users → Add user → Create new user**.
+2. Escribe el email real, elige una contraseña y activa la confirmación automática.
+3. Opcionalmente, en **User metadata**, agrega el nombre visible:
 
    ```json
    { "full_name": "Juan Pérez" }
    ```
 
-El trigger genera el perfil con ese nombre. El valor técnico se usa exclusivamente dentro de Supabase y no se muestra en la aplicación. Login, CLI y creación administrativa generan este valor mediante la misma función centralizada.
+El trigger genera el perfil. Si no proporcionas `full_name`, utiliza la parte anterior a `@` del email como nombre visible inicial.
 
 Después de crear la primera cuenta, promuévela desde SQL Editor:
 
 ```sql
 update public.profiles
 set role = 'admin'
-where public.normalize_item_name(full_name) = public.normalize_item_name('Juan Pérez');
+where full_name = 'Juan Pérez';
 ```
 
-Los usuarios posteriores nacen con rol `user`. Un administrador puede leer todos los perfiles y gestionar asignaciones; un usuario normal solo puede leer su perfil. Si ya creaste cuentas con emails personales, recréalas con este flujo antes de usar el acceso por nombre.
+Los usuarios posteriores nacen con rol `user`. Un administrador puede crearlos desde `/dashboard/admin/users`, indicando nombre visible, email, contraseña y rol. Un usuario normal solo puede leer su perfil.
 
 ## Seguridad RLS
 
@@ -161,7 +150,7 @@ Vercel detectará Next.js automáticamente. No se necesita ninguna clave privada
 
 ## Decisiones importantes
 
-- La normalización se repite conceptualmente en la validación para dar una respuesta rápida, pero el trigger PostgreSQL es la fuente de verdad.
+- La normalización de nombres se aplica únicamente a los ítems para impedir duplicados; no participa en la autenticación.
 - Los datos de `user_items` son legibles por usuarios autenticados para calcular conteos globales. Los perfiles relacionados no se exponen salvo al propio usuario o a un admin.
 - El borrado de un ítem elimina sus asignaciones mediante `ON DELETE CASCADE`.
 - `assigned_by` siempre debe ser el usuario autenticado, incluso cuando un admin asigna a otra persona.

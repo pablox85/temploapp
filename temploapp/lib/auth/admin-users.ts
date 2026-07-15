@@ -3,7 +3,6 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { cleanUsername, normalizedName, usernameToAuthEmail } from "@/lib/auth/username";
 import { adminUserSchema } from "@/lib/validation";
 
 export type CreateAdminUserResult =
@@ -11,7 +10,7 @@ export type CreateAdminUserResult =
   | {
       success: false;
       message: string;
-      fieldErrors?: Partial<Record<"fullName" | "password" | "confirmPassword" | "role", string>>;
+      fieldErrors?: Partial<Record<"fullName" | "email" | "password" | "confirmPassword" | "role", string>>;
     };
 
 export async function createAdminUserAction(
@@ -33,6 +32,7 @@ export async function createAdminUserAction(
 
   const parsed = adminUserSchema.safeParse({
     fullName: formData.get("fullName"),
+    email: formData.get("email"),
     password: formData.get("password"),
     confirmPassword: formData.get("confirmPassword"),
     role: formData.get("role"),
@@ -48,36 +48,26 @@ export async function createAdminUserAction(
     return { success: false, message: "La creación de usuarios no está disponible en modo demo." };
   }
 
-  const fullName = cleanUsername(parsed.data.fullName);
-  const normalized = normalizedName(fullName);
   let admin: ReturnType<typeof createAdminClient>;
   try {
     admin = createAdminClient();
   } catch {
     return { success: false, message: "Error inesperado del servidor." };
   }
-  const { data: existing, error: existingError } = await admin
-    .from("profiles")
-    .select("id")
-    .eq("normalized_name", normalized)
-    .maybeSingle();
-  if (existingError) return { success: false, message: "No se pudo verificar el nombre." };
-  if (existing) return { success: false, message: "Ya existe un usuario con ese nombre." };
-
   const { data: created, error: createError } = await admin.auth.admin.createUser({
-    email: usernameToAuthEmail(fullName),
+    email: parsed.data.email,
     password: parsed.data.password,
     email_confirm: true,
-    user_metadata: { full_name: fullName },
+    user_metadata: { full_name: parsed.data.fullName },
   });
   if (createError || !created.user) {
-    if (createError?.code === "email_exists") return { success: false, message: "Ya existe un usuario con ese nombre." };
+    if (createError?.code === "email_exists") return { success: false, message: "Ya existe un usuario con ese email." };
     return { success: false, message: "No se pudo crear el usuario." };
   }
 
   const { data: profile, error: profileError } = await admin
     .from("profiles")
-    .update({ full_name: fullName, normalized_name: normalized, role: parsed.data.role })
+    .update({ full_name: parsed.data.fullName, role: parsed.data.role })
     .eq("id", created.user.id)
     .select("id, full_name, role")
     .maybeSingle();

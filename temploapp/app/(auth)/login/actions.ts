@@ -4,14 +4,13 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { ActionState } from "@/lib/action-state";
 import { loginSchema } from "@/lib/validation";
-import { usernameToAuthEmail } from "@/lib/auth/username";
 
 export async function loginAction(
   _previousState: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
   const parsed = loginSchema.safeParse({
-    name: formData.get("name"),
+    email: formData.get("email"),
     password: formData.get("password"),
   });
 
@@ -21,10 +20,10 @@ export async function loginAction(
 
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({
-    email: usernameToAuthEmail(parsed.data.name),
+    email: parsed.data.email,
     password: parsed.data.password,
   });
-  if (error) return { status: "error", message: "Nombre o contraseña incorrectos." };
+  if (error) return { status: "error", message: "Email o contraseña incorrectos." };
 
   const requestedPath = String(formData.get("redirectTo") ?? "/dashboard");
   redirect(requestedPath.startsWith("/dashboard") ? requestedPath : "/dashboard");
