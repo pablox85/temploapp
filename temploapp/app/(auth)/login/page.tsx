@@ -9,7 +9,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   const params = await searchParams;
   return (
     <main className="min-h-screen bg-slate-950 lg:grid lg:grid-cols-[1.05fr_.95fr]">
-      <section className="relative hidden overflow-hidden bg-slate-950 p-12 text-white lg:flex lg:flex-col lg:justify-between">
+      <section className="login-panel-left relative hidden overflow-hidden bg-slate-950 p-12 text-white lg:flex lg:flex-col lg:justify-between">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(20,184,166,.22),transparent_35%),radial-gradient(circle_at_85%_80%,rgba(139,92,246,.16),transparent_35%)]" />
         <div className="relative"><Brand inverse /></div>
         <div className="relative max-w-xl">
@@ -24,7 +24,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
         </div>
         <p className="relative text-xs text-slate-500">TemploAPP · por Bpr Soluciones</p>
       </section>
-      <section className="relative flex min-h-screen items-center justify-center overflow-hidden border-slate-800 bg-slate-900 p-6 text-white lg:border-l sm:p-12">
+      <section className="login-panel-right relative flex min-h-screen items-center justify-center overflow-hidden border-slate-800 bg-slate-900 p-6 text-white lg:border-l sm:p-12">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_15%,rgba(20,184,166,.12),transparent_32%),radial-gradient(circle_at_15%_90%,rgba(139,92,246,.12),transparent_35%)]" />
         <div className="relative w-full max-w-md">
           <div className="mb-10 lg:hidden"><Brand inverse /></div>
@@ -32,7 +32,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
           <h2 className="mt-2 text-3xl font-bold tracking-tight text-slate-50">Inicia sesión</h2>
           <p className="mt-3 text-slate-400">Ingresa tu email y contraseña para continuar.</p>
           {params.error === "profile" && <p className="mt-5 rounded-xl border border-amber-400/20 bg-amber-400/10 p-3 text-sm text-amber-200">Tu cuenta no tiene un perfil asociado. Contacta a un administrador.</p>}
-          <div className="mt-8 rounded-2xl border border-slate-700/80 bg-slate-950/70 p-6 shadow-2xl shadow-black/20 backdrop-blur sm:p-8">
+          <div className="login-card mt-8 rounded-2xl border border-slate-700/80 bg-slate-950/70 p-6 shadow-2xl shadow-black/20 backdrop-blur sm:p-8">
             <LoginForm redirectTo={params.redirectTo ?? "/dashboard"} />
           </div>
           <p className="mt-6 text-center text-sm text-slate-500">Las cuentas son gestionadas por el administrador del espacio.</p>

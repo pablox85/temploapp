@@ -65,14 +65,14 @@ export type Database = {
           {
             foreignKeyName: "user_items_user_id_fkey";
             columns: ["user_id"];
-            isOneToOne: false;
+            isOneToOne: true;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
           },
           {
             foreignKeyName: "user_items_item_id_fkey";
             columns: ["item_id"];
-            isOneToOne: false;
+            isOneToOne: true;
             referencedRelation: "items";
             referencedColumns: ["id"];
           },
@@ -116,4 +116,5 @@ export type ItemWithSelection = Item & {
   selection_count: number;
   is_selected: boolean;
   is_available: boolean;
+  assigned_profile: Pick<Profile, "id" | "full_name"> | null;
 };

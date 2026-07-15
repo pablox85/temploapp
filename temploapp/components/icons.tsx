@@ -25,3 +25,5 @@ export const EyeIcon = (props: IconProps) => <Icon {...props}><path d="M2.5 12s3
 export const EyeOffIcon = (props: IconProps) => <Icon {...props}><path d="m3 3 18 18M10.6 6.2A10.7 10.7 0 0 1 12 6c6 0 9.5 6 9.5 6a16.8 16.8 0 0 1-3.1 3.7M6.5 6.9C3.8 8.5 2.5 12 2.5 12s3.5 6 9.5 6c.7 0 1.4-.1 2-.2M9.9 9.9a3 3 0 0 0 4.2 4.2" /></Icon>;
 export const SunIcon = (props: IconProps) => <Icon {...props}><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42" /></Icon>;
 export const MoonIcon = (props: IconProps) => <Icon {...props}><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5 9 9 0 1 0 20.5 14.2Z" /></Icon>;
+export const MenuIcon = (props: IconProps) => <Icon {...props}><path d="M4 6h16M4 12h16M4 18h16" /></Icon>;
+export const CloseIcon = (props: IconProps) => <Icon {...props}><path d="m6 6 12 12M18 6 6 18" /></Icon>;

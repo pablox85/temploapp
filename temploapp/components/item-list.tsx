@@ -17,18 +17,26 @@ export function ItemList({ items, onlySelected = false }: { items: ItemWithSelec
         <input value={query} onChange={(event) => setQuery(event.target.value)} className="input pl-11" placeholder="Buscar ítems…" aria-label="Buscar ítems" />
       </div>
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/[0.03]">
-        <div className="hidden grid-cols-[1fr_180px_170px] border-b border-slate-200 bg-slate-50/70 px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500 md:grid">
-          <span>Ítem</span><span>Selecciones</span><span className="text-right">Acción</span>
+        <div className="hidden grid-cols-[minmax(0,1fr)_140px_minmax(170px,220px)_150px] border-b border-slate-200 bg-slate-50/70 px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500 md:grid">
+          <span>Ítem</span><span>Selecciones</span><span>Seleccionado por</span><span className="text-right">Acción</span>
         </div>
         {filtered.length === 0 ? (
           <p className="px-6 py-14 text-center text-sm text-slate-500">No hay ítems que coincidan con esta búsqueda.</p>
         ) : filtered.map((item) => (
-          <div key={item.id} className="grid gap-3 border-b border-slate-100 px-5 py-4 last:border-0 md:grid-cols-[1fr_180px_170px] md:items-center">
+          <div key={item.id} className="grid gap-3 border-b border-slate-100 px-5 py-4 last:border-0 md:grid-cols-[minmax(0,1fr)_140px_minmax(170px,220px)_150px] md:items-center">
             <div className="min-w-0">
               <p className="truncate font-medium text-slate-900">{item.name}</p>
               <p className="mt-0.5 text-xs text-slate-400">Agregado el {new Intl.DateTimeFormat("es-UY", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(item.created_at))}</p>
             </div>
             <span className="inline-flex items-center gap-2 text-sm text-slate-600"><UsersIcon className="size-4 text-teal-600" />{item.selection_count} {item.selection_count === 1 ? "persona" : "personas"}</span>
+            <div className="min-w-0">
+              <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-400 md:hidden">Seleccionado por</span>
+              <p className={`truncate text-sm font-medium ${item.is_available ? "text-teal-600 dark:text-teal-400" : "text-slate-600 dark:text-slate-300"}`} title={item.assigned_profile?.full_name ?? undefined}>
+                {item.is_available
+                  ? "Disponible"
+                  : item.assigned_profile?.full_name || "Seleccionado"}
+              </p>
+            </div>
             <div className="text-right">
               {item.is_selected ? (
                 <MutationButton action={() => unselectItemAction(item.id)} pendingLabel="Quitando…" className="button-secondary border-teal-200 text-teal-700">
