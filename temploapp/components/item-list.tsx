@@ -9,7 +9,6 @@ import type { ItemWithSelection } from "@/lib/types/database";
 export function ItemList({ items, onlySelected = false }: { items: ItemWithSelection[]; onlySelected?: boolean }) {
   const [query, setQuery] = useState("");
   const filtered = useMemo(() => items.filter((item) => (!onlySelected || item.is_selected) && item.name.toLocaleLowerCase().includes(query.toLocaleLowerCase())), [items, onlySelected, query]);
-  const hasOwnItem = items.some((item) => item.is_selected);
 
   return (
     <div className="space-y-4">
@@ -38,8 +37,8 @@ export function ItemList({ items, onlySelected = false }: { items: ItemWithSelec
               ) : !item.is_available ? (
                 <span className="inline-flex min-h-10 items-center justify-center rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-500 dark:bg-slate-800 dark:text-slate-400">Ocupado</span>
               ) : (
-                <MutationButton action={() => selectItemAction(item.id)} pendingLabel="Seleccionando…" className="button-primary" disabled={hasOwnItem}>
-                  {hasOwnItem ? "Ya tenés un ítem" : "Seleccionar"}
+                <MutationButton action={() => selectItemAction(item.id)} pendingLabel="Seleccionando…" className="button-primary">
+                  Seleccionar
                 </MutationButton>
               )}
             </div>
