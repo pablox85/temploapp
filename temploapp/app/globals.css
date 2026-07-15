@@ -1,8 +1,14 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
 :root {
   --background: #f8fafc;
   --foreground: #0f172a;
+}
+
+.dark {
+  --background: #020617;
+  --foreground: #f8fafc;
 }
 
 @theme inline {
@@ -21,31 +27,50 @@ body {
   font-family: Arial, Helvetica, sans-serif;
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
 }
+
+.dashboard-shell { transition: background-color 180ms ease, color 180ms ease; }
+.dark .dashboard-shell { color-scheme: dark; background-color: #020617; }
+.dark .dashboard-shell [class~="bg-white"] { background-color: #0f172a; }
+.dark .dashboard-shell [class~="bg-slate-50"],
+.dark .dashboard-shell [class~="bg-slate-50/70"] { background-color: #111827; }
+.dark .dashboard-shell [class~="bg-slate-100"] { background-color: #1e293b; }
+.dark .dashboard-shell [class~="text-slate-950"],
+.dark .dashboard-shell [class~="text-slate-900"] { color: #f8fafc; }
+.dark .dashboard-shell [class~="text-slate-700"],
+.dark .dashboard-shell [class~="text-slate-600"] { color: #cbd5e1; }
+.dark .dashboard-shell [class~="text-slate-500"] { color: #94a3b8; }
+.dark .dashboard-shell [class~="border-slate-100"],
+.dark .dashboard-shell [class~="border-slate-200"],
+.dark .dashboard-shell [class~="border-slate-300"] { border-color: #334155; }
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-shell { transition: none; }
+}
 button, a, input, select { outline-color: #0d9488; }
 button, select { cursor: pointer; }
 button:disabled { cursor: not-allowed; opacity: .65; }
 
 @layer components {
   .label {
-    @apply mb-2 block text-sm font-semibold text-slate-700;
+    @apply mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-200;
   }
   .input {
-    @apply block w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm transition placeholder:text-slate-400 hover:border-slate-300 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 focus:outline-none;
+    @apply block w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm transition placeholder:text-slate-400 hover:border-slate-300 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500 dark:hover:border-slate-600;
   }
   .button-primary {
     @apply inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-teal-900/10 transition hover:bg-teal-700 focus-visible:ring-4 focus-visible:ring-teal-500/20 focus-visible:outline-none;
   }
   .button-secondary {
-    @apply inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus-visible:ring-4 focus-visible:ring-slate-200 focus-visible:outline-none;
+    @apply inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus-visible:ring-4 focus-visible:ring-slate-200 focus-visible:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-800;
   }
   .button-danger {
-    @apply inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-rose-200 bg-white px-4 py-2.5 text-sm font-semibold text-rose-700 shadow-sm transition hover:bg-rose-50 focus-visible:ring-4 focus-visible:ring-rose-100 focus-visible:outline-none;
+    @apply inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-rose-200 bg-white px-4 py-2.5 text-sm font-semibold text-rose-700 shadow-sm transition hover:bg-rose-50 focus-visible:ring-4 focus-visible:ring-rose-100 focus-visible:outline-none dark:border-rose-900 dark:bg-slate-900 dark:text-rose-300 dark:hover:bg-rose-950/40;
   }
   .nav-link {
-    @apply inline-flex shrink-0 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-500 transition hover:bg-slate-50 hover:text-slate-900 lg:flex;
+    @apply inline-flex shrink-0 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-500 transition hover:bg-slate-50 hover:text-slate-900 lg:flex dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white;
   }
   .nav-link-active {
-    @apply bg-teal-50 text-teal-700 hover:bg-teal-50 hover:text-teal-800;
+    @apply bg-teal-50 text-teal-700 hover:bg-teal-50 hover:text-teal-800 dark:bg-teal-400/10 dark:text-teal-300 dark:hover:bg-teal-400/15 dark:hover:text-teal-200;
   }
   .badge {
     @apply inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold;

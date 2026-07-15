@@ -21,13 +21,13 @@ export function AdminUserCard({ profile, items, assignments }: { profile: Profil
           <h3 className="truncate font-semibold text-slate-900">{profile.full_name}</h3>
           <p className="mt-0.5 text-xs text-slate-500">{profile.role === "admin" ? "Administrador" : "Usuario"} · {assignedItems.length} asignados</p>
         </div>
-        <span className={`badge ${profile.role === "admin" ? "bg-amber-50 text-amber-700" : "bg-slate-100 text-slate-600"}`}>{profile.role}</span>
+        <span className={`badge ${profile.role === "admin" ? "bg-amber-50 text-amber-700 dark:bg-amber-400/10 dark:text-amber-300" : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300"}`}>{profile.role}</span>
       </div>
 
       <div className="mt-4 flex flex-wrap gap-2">
         {assignedItems.length === 0 && <p className="text-sm text-slate-400">Sin ítems asignados.</p>}
         {assignedItems.map((item) => (
-          <span key={item.id} className="inline-flex items-center gap-1 rounded-full bg-teal-50 py-1 pl-3 pr-1 text-sm text-teal-800">
+          <span key={item.id} className="inline-flex items-center gap-1 rounded-full bg-teal-50 py-1 pl-3 pr-1 text-sm text-teal-800 dark:bg-teal-400/10 dark:text-teal-200">
             {item.name}
             <MutationButton action={() => removeAssignmentAction(profile.id, item.id)} pendingLabel="…" className="grid size-6 place-items-center rounded-full text-teal-700 hover:bg-teal-100" confirmMessage={`¿Quitar “${item.name}” a ${profile.full_name}?`}>
               <span aria-label="Quitar asignación">×</span>

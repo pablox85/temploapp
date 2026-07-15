@@ -7,7 +7,7 @@ export function StatCard({ label, value, detail, icon: Icon, tone = "teal" }: {
   icon: ComponentType<SVGProps<SVGSVGElement>>;
   tone?: "teal" | "violet" | "amber";
 }) {
-  const tones = { teal: "bg-teal-50 text-teal-700", violet: "bg-violet-50 text-violet-700", amber: "bg-amber-50 text-amber-700" };
+  const tones = { teal: "bg-teal-50 text-teal-700 dark:bg-teal-400/10 dark:text-teal-300", violet: "bg-violet-50 text-violet-700 dark:bg-violet-400/10 dark:text-violet-300", amber: "bg-amber-50 text-amber-700 dark:bg-amber-400/10 dark:text-amber-300" };
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/[0.03]">
       <div className="flex items-start justify-between">
