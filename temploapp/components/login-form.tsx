@@ -1,13 +1,15 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { loginAction } from "@/app/(auth)/login/actions";
 import { ActionMessage } from "@/components/action-message";
 import { SubmitButton } from "@/components/submit-button";
 import { initialActionState } from "@/lib/action-state";
+import { EyeIcon, EyeOffIcon } from "@/components/icons";
 
 export function LoginForm({ redirectTo }: { redirectTo: string }) {
   const [state, action] = useActionState(loginAction, initialActionState);
+  const [showPassword, setShowPassword] = useState(false);
 
   return (
     <form action={action} className="space-y-5">
@@ -18,7 +20,12 @@ export function LoginForm({ redirectTo }: { redirectTo: string }) {
       </div>
       <div>
         <label htmlFor="password" className="label text-slate-200">Contraseña</label>
-        <input id="password" name="password" type="password" autoComplete="current-password" required minLength={6} className="input border-slate-700 bg-slate-900 text-slate-100 placeholder:text-slate-500 hover:border-slate-600" placeholder="••••••••" />
+        <div className="relative">
+          <input id="password" name="password" type={showPassword ? "text" : "password"} autoComplete="current-password" required minLength={6} className="input border-slate-700 bg-slate-900 pr-12 text-slate-100 placeholder:text-slate-500 hover:border-slate-600" placeholder="••••••••" />
+          <button type="button" onClick={() => setShowPassword((visible) => !visible)} className="absolute inset-y-0 right-0 grid w-12 place-items-center text-slate-400 transition hover:text-teal-300 focus-visible:text-teal-300" aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"} aria-pressed={showPassword}>
+            {showPassword ? <EyeOffIcon className="size-5" /> : <EyeIcon className="size-5" />}
+          </button>
+        </div>
       </div>
       <ActionMessage state={state} />
       <SubmitButton pendingLabel="Ingresando…" className="button-primary w-full">Iniciar sesión</SubmitButton>

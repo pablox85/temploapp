@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { normalizedName } from "@/lib/auth/username";
 
 export const itemNameSchema = z
   .string()
@@ -14,7 +15,8 @@ export const personNameSchema = z
   .trim()
   .min(1, "Escribe tu nombre.")
   .max(120, "El nombre no puede superar los 120 caracteres.")
-  .transform((value) => value.replace(/\s+/g, " "));
+  .transform((value) => value.replace(/\s+/g, " "))
+  .refine((value) => normalizedName(value).length > 0, "El nombre debe contener letras o números.");
 
 export const loginSchema = z.object({
   name: personNameSchema,

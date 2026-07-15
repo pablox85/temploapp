@@ -96,6 +96,12 @@ Las personas usan únicamente su **nombre único** y contraseña en TemploAPP; n
    npm run user:identifier -- "Juan Pérez"
    ```
 
+   El resultado será legible y determinista:
+
+   ```text
+   juan.perez@temploapp.local
+   ```
+
 2. Ve a **Supabase → Authentication → Users → Add user → Create new user**.
 3. Pega el identificador generado como email, elige una contraseña y activa la confirmación automática.
 4. En **User metadata**, agrega:
@@ -104,7 +110,7 @@ Las personas usan únicamente su **nombre único** y contraseña en TemploAPP; n
    { "full_name": "Juan Pérez" }
    ```
 
-El trigger genera el perfil con ese nombre. El valor técnico se usa exclusivamente dentro de Supabase y no se muestra en la aplicación. La base no permitirá crear `Juan Pérez`, `juan pérez` o ` Juan  Pérez ` como personas diferentes.
+El trigger genera el perfil con ese nombre. El valor técnico se usa exclusivamente dentro de Supabase y no se muestra en la aplicación. Login, CLI y creación administrativa generan este valor mediante la misma función centralizada.
 
 Después de crear la primera cuenta, promuévela desde SQL Editor:
 
