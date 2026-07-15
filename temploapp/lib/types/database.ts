@@ -88,6 +88,14 @@ export type Database = {
     };
     Views: { [_ in never]: never };
     Functions: {
+      select_own_item: {
+        Args: { target_item_id: string };
+        Returns: { user_id: string; item_id: string }[];
+      };
+      reassign_item: {
+        Args: { target_item_id: string; target_user_id: string };
+        Returns: { user_id: string; item_id: string; changed: boolean }[];
+      };
       change_profile_role: {
         Args: { target_profile_id: string; new_role: AppRole };
         Returns: { id: string; role: AppRole; changed: boolean }[];
@@ -107,4 +115,5 @@ export type UserItem = Database["public"]["Tables"]["user_items"]["Row"];
 export type ItemWithSelection = Item & {
   selection_count: number;
   is_selected: boolean;
+  is_available: boolean;
 };

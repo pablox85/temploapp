@@ -3,12 +3,13 @@
 import { useState, useTransition } from "react";
 import type { ActionState } from "@/lib/action-state";
 
-export function MutationButton({ action, children, pendingLabel = "Guardando…", className = "button-secondary", confirmMessage }: {
+export function MutationButton({ action, children, pendingLabel = "Guardando…", className = "button-secondary", confirmMessage, disabled = false }: {
   action: () => Promise<ActionState>;
   children: React.ReactNode;
   pendingLabel?: string;
   className?: string;
   confirmMessage?: string;
+  disabled?: boolean;
 }) {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState("");
@@ -17,7 +18,7 @@ export function MutationButton({ action, children, pendingLabel = "Guardando…"
     <span className="inline-flex flex-col items-end gap-1">
       <button
         type="button"
-        disabled={pending}
+        disabled={pending || disabled}
         className={className}
         onClick={() => {
           if (confirmMessage && !window.confirm(confirmMessage)) return;

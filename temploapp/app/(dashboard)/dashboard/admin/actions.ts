@@ -4,13 +4,14 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getActionError, type ActionState } from "@/lib/action-state";
 import { requireAdmin } from "@/lib/auth";
-import { idSchema, itemNameSchema } from "@/lib/validation";
+import { idSchema, itemAssignmentSchema, itemNameSchema } from "@/lib/validation";
 
 function refreshAll() {
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/items");
   revalidatePath("/dashboard/my-items");
   revalidatePath("/dashboard/admin");
+  revalidatePath("/dashboard/admin/users");
 }
 
 export async function updateItemAction(
@@ -43,38 +44,38 @@ export async function deleteItemAction(itemId: string): Promise<ActionState> {
   return { status: "success", message: "Ítem eliminado." };
 }
 
-export async function assignItemAction(userId: string, itemId: string): Promise<ActionState> {
-  const admin = await requireAdmin();
-  const user = idSchema.safeParse(userId);
-  const item = idSchema.safeParse(itemId);
-  if (!user.success || !item.success) return { status: "error", message: "Asignación inválida." };
+export async function reassignItemAction(userId: string, itemId: string): Promise<ActionState> {
+  await requireAdmin();
+  const parsed = itemAssignmentSchema.safeParse({ userId, itemId });
+  if (!parsed.success) return { status: "error", message: "Asignación inválida." };
 
   const supabase = await createClient();
-  const { error } = await supabase.from("user_items").insert({
-    user_id: user.data,
-    item_id: item.data,
-    assigned_by: admin.id,
+  const { data, error } = await supabase.rpc("reassign_item", {
+    target_user_id: parsed.data.userId,
+    target_item_id: parsed.data.itemId,
   });
   if (error) {
-    if (error.code === "23505") return { status: "success", message: "Ya estaba asignado." };
+    if (error.code === "P0001") return { status: "error", message: "El usuario destino ya tiene un ítem seleccionado." };
+    if (error.code === "P0003") return { status: "error", message: "El ítem seleccionado no existe." };
+    if (error.code === "P0004") return { status: "error", message: "El usuario destino no existe." };
+    if (error.code === "42501") return { status: "error", message: "No tienes permisos para reasignar ítems." };
     return { status: "error", message: getActionError(error) };
   }
   refreshAll();
-  return { status: "success", message: "Asignación agregada." };
+  return { status: "success", message: data?.[0]?.changed ? "Ítem reasignado." : "El ítem ya pertenece a este usuario." };
 }
 
 export async function removeAssignmentAction(userId: string, itemId: string): Promise<ActionState> {
   await requireAdmin();
-  const user = idSchema.safeParse(userId);
-  const item = idSchema.safeParse(itemId);
-  if (!user.success || !item.success) return { status: "error", message: "Asignación inválida." };
+  const parsed = itemAssignmentSchema.safeParse({ userId, itemId });
+  if (!parsed.success) return { status: "error", message: "Asignación inválida." };
 
   const supabase = await createClient();
   const { error } = await supabase
     .from("user_items")
     .delete()
-    .eq("user_id", user.data)
-    .eq("item_id", item.data);
+    .eq("user_id", parsed.data.userId)
+    .eq("item_id", parsed.data.itemId);
   if (error) return { status: "error", message: getActionError(error) };
   refreshAll();
   return { status: "success", message: "Asignación quitada." };

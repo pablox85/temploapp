@@ -17,7 +17,7 @@ export default async function AdminPage() {
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/[0.03]"><div className="border-b border-slate-200 px-5 py-4"><h2 className="text-lg font-semibold text-slate-900">Administrar ítems</h2><p className="mt-1 text-sm text-slate-500">{items.length} ítems en total</p></div>{items.length ? items.map((item) => <AdminItemEditor key={item.id} item={item} />) : <p className="p-8 text-center text-sm text-slate-500">La lista está vacía.</p>}</div>
       </section>
 
-      <section className="mt-10"><div className="mb-5"><h2 className="text-xl font-bold text-slate-950">Usuarios y asignaciones</h2><p className="mt-1 text-sm text-slate-500">Agrega o quita ítems para cualquier persona.</p></div><div className="grid gap-4 xl:grid-cols-2">{profiles.map((profile) => <AdminUserCard key={profile.id} profile={profile} items={items} assignments={assignments} />)}</div></section>
+      <section className="mt-10"><div className="mb-5"><h2 className="text-xl font-bold text-slate-950">Usuarios y asignaciones</h2><p className="mt-1 text-sm text-slate-500">Reasigna un ítem disponible u ocupado; cada persona solo puede tener uno.</p></div><div className="grid gap-4 xl:grid-cols-2">{profiles.map((profile) => <AdminUserCard key={profile.id} profile={profile} profiles={profiles} items={items} assignments={assignments} />)}</div></section>
     </div>
   );
 }

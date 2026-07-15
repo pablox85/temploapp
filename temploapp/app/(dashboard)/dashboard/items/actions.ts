@@ -11,6 +11,7 @@ function refreshItemViews() {
   revalidatePath("/dashboard/items");
   revalidatePath("/dashboard/my-items");
   revalidatePath("/dashboard/admin");
+  revalidatePath("/dashboard/admin/users");
 }
 
 export async function createItemAction(
@@ -33,19 +34,18 @@ export async function createItemAction(
 }
 
 export async function selectItemAction(itemId: string): Promise<ActionState> {
-  const user = await requireUser();
+  await requireUser();
   const parsedId = idSchema.safeParse(itemId);
   if (!parsedId.success) return { status: "error", message: parsedId.error.issues[0].message };
 
   const supabase = await createClient();
-  const { error } = await supabase.from("user_items").insert({
-    user_id: user.id,
-    item_id: parsedId.data,
-    assigned_by: user.id,
-  });
+  const { error } = await supabase.rpc("select_own_item", { target_item_id: parsedId.data });
 
   if (error) {
-    if (error.code === "23505") return { status: "success", message: "Ya estaba seleccionado." };
+    if (error.code === "P0001") return { status: "error", message: "Ya tenés un ítem seleccionado." };
+    if (error.code === "P0002") return { status: "error", message: "Este ítem ya fue seleccionado por otro usuario." };
+    if (error.code === "P0003") return { status: "error", message: "El ítem seleccionado no existe." };
+    if (error.code === "28000") return { status: "error", message: "Sesión expirada. Inicia sesión nuevamente." };
     return { status: "error", message: getActionError(error) };
   }
   refreshItemViews();

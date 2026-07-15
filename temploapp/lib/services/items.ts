@@ -30,6 +30,7 @@ export async function getItems(userId: string): Promise<ItemWithSelection[]> {
     ...item,
     selection_count: user_items[0]?.count ?? 0,
     is_selected: selectedIds.has(item.id),
+    is_available: (user_items[0]?.count ?? 0) === 0,
   }));
 }
 

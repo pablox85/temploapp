@@ -38,3 +38,8 @@ export const profileRoleChangeSchema = z.object({
   profileId: idSchema,
   role: z.enum(["user", "admin"], { message: "El rol seleccionado no es válido." }),
 });
+
+export const itemAssignmentSchema = z.object({
+  userId: idSchema,
+  itemId: idSchema,
+});
