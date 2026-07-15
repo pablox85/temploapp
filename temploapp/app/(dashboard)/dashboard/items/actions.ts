@@ -42,11 +42,13 @@ export async function selectItemAction(itemId: string): Promise<ActionState> {
   const { error } = await supabase.rpc("select_own_item", { target_item_id: parsedId.data });
 
   if (error) {
+    console.error("select_own_item error:", JSON.stringify(error, null, 2)); // TEMPORAL: quitar después
     if (error.code === "P0001") return { status: "error", message: "Ya tenés un ítem seleccionado." };
     if (error.code === "P0002") return { status: "error", message: "Este ítem ya fue seleccionado por otro usuario." };
     if (error.code === "P0003") return { status: "error", message: "El ítem seleccionado no existe." };
     if (error.code === "28000") return { status: "error", message: "Sesión expirada. Inicia sesión nuevamente." };
-    return { status: "error", message: getActionError(error) };
+    // TEMPORAL: mostrar código y mensaje real en pantalla
+    return { status: "error", message: `DEBUG [${error.code}]: ${error.message}` };
   }
   refreshItemViews();
   return { status: "success", message: "Ítem seleccionado." };
