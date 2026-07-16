@@ -22,14 +22,20 @@ export function MobileDashboardMenu({ isAdmin, fullName, children }: { isAdmin: 
   }, [open]);
 
   return <>
-    <header className="flex items-center justify-between border-b border-slate-200 bg-white px-5 py-4 dark:border-slate-800 dark:bg-slate-900 lg:hidden">
+    <header className="sticky top-0 z-40 flex items-center justify-between border-b border-slate-200 bg-white px-5 py-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 lg:hidden">
       <Brand />
       <div className="flex items-center gap-2">
         <DashboardQuickLinks isAdmin={isAdmin} />
-        <ThemeToggle />
-        <button type="button" onClick={() => setOpen(true)} className="grid size-9 place-items-center rounded-lg border border-slate-200 text-slate-600 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800" aria-label="Abrir menú" aria-expanded={open}>
-          <MenuIcon className="size-5" />
-        </button>
+        <div className="flex flex-col items-center gap-0.5">
+          <ThemeToggle />
+          <span className="text-[9px] font-medium leading-3 text-slate-500 dark:text-slate-400">Tema</span>
+        </div>
+        <div className="flex flex-col items-center gap-0.5">
+          <button type="button" onClick={() => setOpen(true)} className="grid size-9 place-items-center rounded-lg border border-slate-200 text-slate-600 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800" aria-label="Abrir menú" aria-expanded={open}>
+            <MenuIcon className="size-5" />
+          </button>
+          <span className="text-[9px] font-medium leading-3 text-slate-500 dark:text-slate-400">Menú</span>
+        </div>
       </div>
     </header>
     {open && <div className="fixed inset-0 z-50 lg:hidden">

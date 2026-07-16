@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CheckIcon, ListIcon, PlusIcon, ShieldIcon, UsersIcon } from "@/components/icons";
+import { CheckIcon, GridIcon, ListIcon, PlusIcon, ShieldIcon, UsersIcon } from "@/components/icons";
 
 const links = [
   { href: "/dashboard/items", label: "Lista de ítems", icon: ListIcon, exact: true },
@@ -34,20 +34,24 @@ export function DashboardNav({ isAdmin, mobile = false, onNavigate }: { isAdmin:
 
 export function DashboardQuickLinks({ isAdmin }: { isAdmin: boolean }) {
   const pathname = usePathname();
+  const quickLinks = [{ href: "/dashboard", label: "Panel", icon: GridIcon, exact: true }, ...getLinks(isAdmin)];
   return (
-    <nav aria-label="Accesos directos" className="flex items-center gap-1">
-      {getLinks(isAdmin).filter(({ href }) => href !== "/dashboard/items/new").map(({ href, label, icon: Icon, exact }) => {
+    <nav aria-label="Accesos directos" className="flex items-start gap-1">
+      {quickLinks.filter(({ href }) => href !== "/dashboard/items/new").map(({ href, label, icon: Icon, exact }) => {
         const active = exact ? pathname === href : pathname.startsWith(href);
+        const shortLabel = href === "/dashboard" ? "Panel" : href === "/dashboard/items" ? "Lista" : href === "/dashboard/my-items" ? "Mis ítems" : href === "/dashboard/admin" ? "Admin" : "Usuarios";
         return (
-          <Link
-            key={href}
-            href={href}
-            className={`grid size-9 place-items-center rounded-lg border transition ${active ? "border-teal-300 bg-teal-50 text-teal-700 dark:border-teal-700 dark:bg-teal-400/10 dark:text-teal-300" : "border-slate-200 text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"}`}
-            aria-label={label}
-            title={label}
-          >
-            <Icon className="size-4.5" />
-          </Link>
+          <div key={href} className="flex min-w-9 flex-col items-center gap-0.5">
+            <Link
+              href={href}
+              className={`grid size-9 place-items-center rounded-lg border transition ${active ? "border-teal-300 bg-teal-50 text-teal-700 dark:border-teal-700 dark:bg-teal-400/10 dark:text-teal-300" : "border-slate-200 text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"}`}
+              aria-label={label}
+              title={label}
+            >
+              <Icon className="size-4" />
+            </Link>
+            <span className={`whitespace-nowrap text-[9px] font-medium leading-3 ${active ? "text-teal-700 dark:text-teal-300" : "text-slate-500 dark:text-slate-400"}`} aria-hidden="true">{shortLabel}</span>
+          </div>
         );
       })}
     </nav>

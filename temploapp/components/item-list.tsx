@@ -23,7 +23,7 @@ export function ItemList({ items, onlySelected = false }: { items: ItemWithSelec
         {filtered.length === 0 ? (
           <p className="px-6 py-14 text-center text-sm text-slate-500">No hay ítems que coincidan con esta búsqueda.</p>
         ) : filtered.map((item) => (
-          <div key={item.id} className="grid gap-3 border-b border-slate-100 px-5 py-4 last:border-0 md:grid-cols-[minmax(0,1fr)_140px_minmax(170px,220px)_150px] md:items-center">
+          <div key={item.id} className="motion-card grid gap-3 border-b border-slate-100 px-5 py-4 last:border-0 md:grid-cols-[minmax(0,1fr)_140px_minmax(170px,220px)_150px] md:items-center">
             <div className="min-w-0">
               <p className="truncate font-medium text-slate-900">{item.name}</p>
               <p className="mt-0.5 text-xs text-slate-400">Agregado el {new Intl.DateTimeFormat("es-UY", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(item.created_at))}</p>

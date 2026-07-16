@@ -15,7 +15,7 @@ export function AdminUserCard({ profile, profiles, items, assignments }: { profi
   const selectedOwner = selectedAssignment ? profileById.get(selectedAssignment.user_id) : undefined;
 
   return (
-    <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/[0.03]">
+    <article className="motion-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/[0.03]">
       <div className="flex items-center justify-between gap-4">
         <div className="min-w-0">
           <h3 className="truncate font-semibold text-slate-900">{profile.full_name}</h3>
