@@ -15,7 +15,7 @@ function getSnapshot() {
 }
 
 export function ThemeToggle() {
-  const dark = useSyncExternalStore(subscribe, getSnapshot, () => false);
+  const dark = useSyncExternalStore(subscribe, getSnapshot, () => true);
 
   function toggleTheme() {
     const next = !dark;
