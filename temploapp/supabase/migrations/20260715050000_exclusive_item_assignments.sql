@@ -1,10 +1,5 @@
--- Keep the earliest assignment when upgrading existing data, then enforce one-to-one ownership.
-with ranked as (
-  select id, row_number() over (partition by user_id order by created_at, id) as position
-  from public.user_items
-)
-delete from public.user_items where id in (select id from ranked where position > 1);
-
+-- Keep the earliest owner for each item, then enforce one owner per item.
+-- A user may own any number of different items.
 with ranked as (
   select id, row_number() over (partition by item_id order by created_at, id) as position
   from public.user_items
@@ -12,7 +7,7 @@ with ranked as (
 delete from public.user_items where id in (select id from ranked where position > 1);
 
 alter table public.user_items
-  add constraint user_items_user_id_key unique (user_id),
+  drop constraint if exists user_items_user_id_key,
   add constraint user_items_item_id_key unique (item_id);
 
 -- Inserts are only allowed through the RPCs below. They are atomic and return clear domain errors.
@@ -37,8 +32,12 @@ begin
   if not exists (select 1 from public.items where id = target_item_id) then
     raise exception 'El ítem seleccionado no existe.' using errcode = 'P0003';
   end if;
-  if exists (select 1 from public.user_items where user_items.user_id = actor_id) then
-    raise exception 'Ya tenés un ítem seleccionado.' using errcode = 'P0001';
+  if exists (
+    select 1 from public.user_items
+    where user_items.user_id = actor_id
+      and user_items.item_id = target_item_id
+  ) then
+    raise exception 'Ya seleccionaste este ítem.' using errcode = 'P0001';
   end if;
   if exists (select 1 from public.user_items where user_items.item_id = target_item_id) then
     raise exception 'Este ítem ya fue seleccionado por otro usuario.' using errcode = 'P0002';
@@ -49,8 +48,12 @@ begin
   return query select actor_id, target_item_id;
 exception
   when unique_violation then
-    if exists (select 1 from public.user_items where user_items.user_id = actor_id) then
-      raise exception 'Ya tenés un ítem seleccionado.' using errcode = 'P0001';
+    if exists (
+      select 1 from public.user_items
+      where user_items.user_id = actor_id
+        and user_items.item_id = target_item_id
+    ) then
+      raise exception 'Ya seleccionaste este ítem.' using errcode = 'P0001';
     end if;
     raise exception 'Este ítem ya fue seleccionado por otro usuario.' using errcode = 'P0002';
 end;
@@ -96,10 +99,6 @@ begin
   if current_owner_id = target_user_id then
     return query select target_user_id, target_item_id, false;
     return;
-  end if;
-
-  if exists (select 1 from public.user_items where user_items.user_id = target_user_id) then
-    raise exception 'El usuario destino ya tiene un ítem seleccionado.' using errcode = 'P0001';
   end if;
 
   delete from public.user_items where user_items.item_id = target_item_id;
