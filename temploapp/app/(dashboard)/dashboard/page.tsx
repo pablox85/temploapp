@@ -18,9 +18,9 @@ export default async function DashboardPage() {
       </header>
 
       <section className="mt-8 grid gap-4 sm:grid-cols-3">
-        <StatCard label="Ítems disponibles" value={stats.items} detail="En la lista colaborativa" icon={ListIcon} />
-        <StatCard label="Mi selección" value={stats.mine} detail="Ítem seleccionado por ti" icon={CheckIcon} tone="violet" />
-        <StatCard label="Selecciones totales" value={stats.assignments} detail="Entre todos los usuarios" icon={UsersIcon} tone="amber" />
+        <StatCard href="/dashboard/items" label="Ítems disponibles" value={stats.items} detail="En la lista colaborativa" icon={ListIcon} />
+        <StatCard href="/dashboard/my-items" label="Mi selección" value={stats.mine} detail="Ítems seleccionados por ti" icon={CheckIcon} tone="violet" />
+        <StatCard href="/dashboard/items" label="Selecciones totales" value={stats.assignments} detail="Entre todos los usuarios" icon={UsersIcon} tone="amber" />
       </section>
 
       <section className="mt-8 grid gap-6 lg:grid-cols-[1.4fr_.8fr]">

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Brand } from "@/components/brand";
 import { CloseIcon, MenuIcon } from "@/components/icons";
-import { DashboardNav } from "@/components/dashboard-nav";
+import { DashboardNav, DashboardQuickLinks } from "@/components/dashboard-nav";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 export function MobileDashboardMenu({ isAdmin, fullName, children }: { isAdmin: boolean; fullName: string; children: React.ReactNode }) {
@@ -25,6 +25,7 @@ export function MobileDashboardMenu({ isAdmin, fullName, children }: { isAdmin: 
     <header className="flex items-center justify-between border-b border-slate-200 bg-white px-5 py-4 dark:border-slate-800 dark:bg-slate-900 lg:hidden">
       <Brand />
       <div className="flex items-center gap-2">
+        <DashboardQuickLinks isAdmin={isAdmin} />
         <ThemeToggle />
         <button type="button" onClick={() => setOpen(true)} className="grid size-9 place-items-center rounded-lg border border-slate-200 text-slate-600 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800" aria-label="Abrir menú" aria-expanded={open}>
           <MenuIcon className="size-5" />

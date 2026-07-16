@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CheckIcon, ListIcon, PlusIcon, ShieldIcon } from "@/components/icons";
+import { CheckIcon, ListIcon, PlusIcon, ShieldIcon, UsersIcon } from "@/components/icons";
 
 const links = [
   { href: "/dashboard/items", label: "Lista de ítems", icon: ListIcon, exact: true },
@@ -10,9 +10,13 @@ const links = [
   { href: "/dashboard/my-items", label: "Mis ítems", icon: CheckIcon },
 ];
 
+function getLinks(isAdmin: boolean) {
+  return isAdmin ? [...links, { href: "/dashboard/admin", label: "Panel admin", icon: ShieldIcon, exact: true }, { href: "/dashboard/admin/users", label: "Usuarios", icon: UsersIcon, exact: true }] : links;
+}
+
 export function DashboardNav({ isAdmin, mobile = false, onNavigate }: { isAdmin: boolean; mobile?: boolean; onNavigate?: () => void }) {
   const pathname = usePathname();
-  const allLinks = isAdmin ? [...links, { href: "/dashboard/admin", label: "Panel admin", icon: ShieldIcon, exact: true }, { href: "/dashboard/admin/users", label: "Usuarios", icon: ShieldIcon, exact: true }] : links;
+  const allLinks = getLinks(isAdmin);
 
   return (
     <nav aria-label="Navegación principal" className={mobile ? "space-y-1" : "flex min-w-max gap-1 lg:block lg:min-w-0 lg:space-y-1"}>
@@ -21,6 +25,28 @@ export function DashboardNav({ isAdmin, mobile = false, onNavigate }: { isAdmin:
         return (
           <Link key={href} href={href} onClick={onNavigate} className={`nav-link ${mobile ? "w-full" : ""} ${active ? "nav-link-active" : ""}`}>
             <Icon className="size-5" />{label}
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
+
+export function DashboardQuickLinks({ isAdmin }: { isAdmin: boolean }) {
+  const pathname = usePathname();
+  return (
+    <nav aria-label="Accesos directos" className="flex items-center gap-1">
+      {getLinks(isAdmin).filter(({ href }) => href !== "/dashboard/items/new").map(({ href, label, icon: Icon, exact }) => {
+        const active = exact ? pathname === href : pathname.startsWith(href);
+        return (
+          <Link
+            key={href}
+            href={href}
+            className={`grid size-9 place-items-center rounded-lg border transition ${active ? "border-teal-300 bg-teal-50 text-teal-700 dark:border-teal-700 dark:bg-teal-400/10 dark:text-teal-300" : "border-slate-200 text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"}`}
+            aria-label={label}
+            title={label}
+          >
+            <Icon className="size-4.5" />
           </Link>
         );
       })}
