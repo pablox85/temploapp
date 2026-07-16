@@ -1,5 +1,6 @@
 import { mkdir } from "node:fs/promises";
 import { access } from "node:fs/promises";
+import { dirname, resolve } from "node:path";
 import puppeteer from "puppeteer-core";
 
 const args = process.argv.slice(2);
@@ -35,6 +36,9 @@ async function findChrome() {
 }
 
 const url = valueFor("--url", "http://localhost:3000");
+const loginEmail = valueFor("--email", "");
+const loginPassword = valueFor("--password", "");
+const loginUrl = valueFor("--login-url", "http://localhost:3000/login");
 const screenshot = valueFor("--screenshot", "artifacts/marioneta.png");
 const width = Number(valueFor("--width", "390"));
 const height = Number(valueFor("--height", "844"));
@@ -59,8 +63,22 @@ try {
     if (message.type() === "error") console.error(`[marioneta:browser] ${message.text()}`);
   });
   await page.goto(url, { waitUntil: "networkidle2" });
+  if (loginEmail && loginPassword) {
+    await page.goto(`${loginUrl}?redirectTo=${encodeURIComponent(new URL(url).pathname)}`, { waitUntil: "networkidle2" });
+    await page.type("#email", loginEmail);
+    await page.type("#password", loginPassword);
+    await Promise.allSettled([
+      page.waitForNavigation({ waitUntil: "networkidle2", timeout: 10000 }),
+      page.click('button[type="submit"]'),
+    ]);
+    await new Promise((resolve) => setTimeout(resolve, 900));
+    if (page.url().includes("/login")) {
+      const message = await page.locator("body").innerText();
+      throw new Error(`El login no completó la navegación. Texto visible: ${message.slice(-300)}`);
+    }
+  }
   await new Promise((resolve) => setTimeout(resolve, wait));
-  await mkdir(new URL(`file://${process.cwd()}/${screenshot}`).pathname.replace(/\/[^/]+$/, ""), { recursive: true });
+  await mkdir(dirname(resolve(screenshot)), { recursive: true });
   await page.screenshot({ path: screenshot, fullPage });
   console.log(`[marioneta] Screenshot guardado en ${screenshot}`);
   console.log(`[marioneta] URL ${page.url()} · viewport ${width}x${height}`);

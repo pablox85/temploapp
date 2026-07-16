@@ -22,9 +22,9 @@ export function MobileDashboardMenu({ isAdmin, fullName, children }: { isAdmin: 
   }, [open]);
 
   return <>
-    <header className="sticky top-0 z-40 flex items-center justify-between border-b border-slate-200 bg-white px-5 py-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 lg:hidden">
-      <Brand />
-      <div className="flex items-center gap-2">
+    <header className="sticky top-0 z-40 flex items-center justify-between gap-2 border-b border-slate-200 bg-white px-5 py-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 lg:hidden">
+      <Brand responsive />
+      <div className="flex min-w-0 items-start gap-1">
         <DashboardQuickLinks isAdmin={isAdmin} />
         <div className="flex flex-col items-center gap-0.5">
           <ThemeToggle />
