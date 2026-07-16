@@ -11,15 +11,30 @@ export type AppRole = "admin" | "user";
 export type Database = {
   public: {
     Tables: {
-      profiles: {
-        Row: { id: string; full_name: string; role: AppRole; created_at: string };
-        Insert: { id: string; full_name: string; role?: AppRole; created_at?: string };
-        Update: { full_name?: string; role?: AppRole };
+      tenants: {
+        Row: { id: string; name: string; created_at: string };
+        Insert: { id: string; name: string; created_at?: string };
+        Update: { name?: string };
         Relationships: [];
+      };
+      profiles: {
+        Row: { id: string; tenant_id: string; full_name: string; role: AppRole; created_at: string };
+        Insert: { id: string; tenant_id?: string; full_name: string; role?: AppRole; created_at?: string };
+        Update: { full_name?: string; role?: AppRole };
+        Relationships: [
+          {
+            foreignKeyName: "profiles_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       items: {
         Row: {
           id: string;
+          tenant_id: string;
           name: string;
           normalized_name: string;
           created_by: string;
@@ -28,6 +43,7 @@ export type Database = {
         };
         Insert: {
           id?: string;
+          tenant_id?: string;
           name: string;
           normalized_name?: string;
           created_by: string;
@@ -38,9 +54,16 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "items_created_by_fkey";
-            columns: ["created_by"];
+            columns: ["tenant_id", "created_by"];
             isOneToOne: false;
             referencedRelation: "profiles";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "items_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
             referencedColumns: ["id"];
           },
         ];
@@ -48,6 +71,7 @@ export type Database = {
       user_items: {
         Row: {
           id: string;
+          tenant_id: string;
           user_id: string;
           item_id: string;
           assigned_by: string;
@@ -55,6 +79,7 @@ export type Database = {
         };
         Insert: {
           id?: string;
+          tenant_id?: string;
           user_id: string;
           item_id: string;
           assigned_by: string;
@@ -64,23 +89,30 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "user_items_user_id_fkey";
-            columns: ["user_id"];
+            columns: ["tenant_id", "user_id"];
             isOneToOne: true;
             referencedRelation: "profiles";
-            referencedColumns: ["id"];
+            referencedColumns: ["tenant_id", "id"];
           },
           {
             foreignKeyName: "user_items_item_id_fkey";
-            columns: ["item_id"];
+            columns: ["tenant_id", "item_id"];
             isOneToOne: true;
             referencedRelation: "items";
-            referencedColumns: ["id"];
+            referencedColumns: ["tenant_id", "id"];
           },
           {
             foreignKeyName: "user_items_assigned_by_fkey";
-            columns: ["assigned_by"];
+            columns: ["tenant_id", "assigned_by"];
             isOneToOne: false;
             referencedRelation: "profiles";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "user_items_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
             referencedColumns: ["id"];
           },
         ];
@@ -100,6 +132,7 @@ export type Database = {
         Args: { target_profile_id: string; new_role: AppRole };
         Returns: { id: string; role: AppRole; changed: boolean }[];
       };
+      current_tenant_id: { Args: Record<PropertyKey, never>; Returns: string };
       is_admin: { Args: Record<PropertyKey, never>; Returns: boolean };
       normalize_item_name: { Args: { value: string }; Returns: string };
     };
@@ -108,9 +141,10 @@ export type Database = {
   };
 };
 
-export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
-export type Item = Database["public"]["Tables"]["items"]["Row"];
-export type UserItem = Database["public"]["Tables"]["user_items"]["Row"];
+export type Tenant = Database["public"]["Tables"]["tenants"]["Row"];
+export type Profile = Omit<Database["public"]["Tables"]["profiles"]["Row"], "tenant_id">;
+export type Item = Omit<Database["public"]["Tables"]["items"]["Row"], "tenant_id">;
+export type UserItem = Omit<Database["public"]["Tables"]["user_items"]["Row"], "tenant_id">;
 
 export type ItemWithSelection = Item & {
   selection_count: number;

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { requireCurrentTenantId } from "@/lib/tenant";
 import { adminUserSchema } from "@/lib/validation";
 
 export type CreateAdminUserResult =
@@ -49,8 +50,10 @@ export async function createAdminUserAction(
   }
 
   let admin: ReturnType<typeof createAdminClient>;
+  let tenantId: string;
   try {
     admin = createAdminClient();
+    tenantId = await requireCurrentTenantId();
   } catch {
     return { success: false, message: "Error inesperado del servidor." };
   }
@@ -59,6 +62,7 @@ export async function createAdminUserAction(
     password: parsed.data.password,
     email_confirm: true,
     user_metadata: { full_name: parsed.data.fullName },
+    app_metadata: { tenant_id: tenantId },
   });
   if (createError || !created.user) {
     if (createError?.code === "email_exists") return { success: false, message: "Ya existe un usuario con ese email." };

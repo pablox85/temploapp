@@ -25,9 +25,15 @@ export async function listAdminProfiles(): Promise<AdminUserListItem[]> {
 export async function getAdminData(): Promise<AdminData> {
   const supabase = await createClient();
   const [profiles, items, assignments] = await Promise.all([
-    supabase.from("profiles").select("*").order("full_name"),
-    supabase.from("items").select("*").order("name"),
-    supabase.from("user_items").select("*").order("created_at", { ascending: false }),
+    supabase.from("profiles").select("id, full_name, role, created_at").order("full_name"),
+    supabase
+      .from("items")
+      .select("id, name, normalized_name, created_by, created_at, updated_at")
+      .order("name"),
+    supabase
+      .from("user_items")
+      .select("id, user_id, item_id, assigned_by, created_at")
+      .order("created_at", { ascending: false }),
   ]);
 
   const error = profiles.error ?? items.error ?? assignments.error;
