@@ -38,9 +38,9 @@ export function MobileDashboardMenu({ isAdmin, fullName, children }: { isAdmin: 
         </div>
       </div>
     </header>
-    {open && <div className="fixed inset-0 z-50 lg:hidden">
-      <button type="button" className="absolute inset-0 bg-slate-950/50 backdrop-blur-[2px]" onClick={() => setOpen(false)} aria-label="Cerrar menú" />
-      <aside className="relative flex h-full w-[min(86vw,320px)] flex-col border-r border-slate-200 bg-white p-5 shadow-2xl dark:border-slate-800 dark:bg-slate-900" role="dialog" aria-modal="true" aria-label="Menú principal">
+    <div className={`fixed inset-0 z-50 transition-opacity duration-300 ease-out lg:hidden ${open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"}`} aria-hidden={!open}>
+      <button type="button" tabIndex={open ? 0 : -1} className="absolute inset-0 bg-slate-950/50 opacity-100 backdrop-blur-[2px] transition-opacity duration-300 ease-out" onClick={() => setOpen(false)} aria-label="Cerrar menú" />
+      <aside className={`relative flex h-full w-[min(86vw,320px)] flex-col border-r border-slate-200 bg-white p-5 shadow-2xl transition-transform duration-300 ease-[cubic-bezier(.22,1,.36,1)] will-change-transform dark:border-slate-800 dark:bg-slate-900 ${open ? "translate-x-0" : "-translate-x-full"}`} role="dialog" aria-modal="true" aria-label="Menú principal">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <Brand />
@@ -51,6 +51,6 @@ export function MobileDashboardMenu({ isAdmin, fullName, children }: { isAdmin: 
         <div className="mt-8"><DashboardNav isAdmin={isAdmin} mobile onNavigate={() => setOpen(false)} /></div>
         <div className="mt-auto border-t border-slate-100 pt-5 dark:border-slate-800">{children}</div>
       </aside>
-    </div>}
+    </div>
   </>;
 }
