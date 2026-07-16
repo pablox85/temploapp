@@ -3,8 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { requireCurrentTenantId } from "@/lib/tenant";
-import { adminUserSchema } from "@/lib/validation";
+import { adminUserSchema, idSchema } from "@/lib/validation";
 
 export type CreateAdminUserResult =
   | { success: true; message: string; user: { id: string; fullName: string; role: "user" | "admin" } }
@@ -22,12 +21,17 @@ export async function createAdminUserAction(
   const { data: authData, error: authError } = await sessionClient.auth.getUser();
   if (authError || !authData.user) return { success: false, message: "Sesión expirada. Inicia sesión nuevamente." };
 
-  const { data: actor, error: actorError } = await sessionClient
+  const { data: adminProfile, error: adminProfileError } = await sessionClient
     .from("profiles")
-    .select("id, role")
+    .select("id, role, tenant_id")
     .eq("id", authData.user.id)
     .maybeSingle();
-  if (actorError || !actor || actor.role !== "admin") {
+  if (
+    adminProfileError
+    || !adminProfile
+    || adminProfile.role !== "admin"
+    || !idSchema.safeParse(adminProfile.tenant_id).success
+  ) {
     return { success: false, message: "No tienes permisos para crear usuarios." };
   }
 
@@ -50,10 +54,8 @@ export async function createAdminUserAction(
   }
 
   let admin: ReturnType<typeof createAdminClient>;
-  let tenantId: string;
   try {
     admin = createAdminClient();
-    tenantId = await requireCurrentTenantId();
   } catch {
     return { success: false, message: "Error inesperado del servidor." };
   }
@@ -62,7 +64,7 @@ export async function createAdminUserAction(
     password: parsed.data.password,
     email_confirm: true,
     user_metadata: { full_name: parsed.data.fullName },
-    app_metadata: { tenant_id: tenantId },
+    app_metadata: { tenant_id: adminProfile.tenant_id },
   });
   if (createError || !created.user) {
     if (createError?.code === "email_exists") return { success: false, message: "Ya existe un usuario con ese email." };
