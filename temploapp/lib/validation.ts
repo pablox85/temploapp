@@ -9,6 +9,16 @@ export const itemNameSchema = z
 
 export const idSchema = z.string().uuid("Identificador inválido.");
 
+// PostgreSQL accepts canonical UUID values regardless of RFC version/variant.
+// The seeded tenant uses 00000000-0000-0000-0000-000000000001, which is a
+// valid PostgreSQL uuid but is intentionally rejected by Zod's strict uuid().
+export const tenantIdSchema = z
+  .string()
+  .regex(
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
+    "Tenant inválido.",
+  );
+
 export const personNameSchema = z
   .string()
   .trim()
