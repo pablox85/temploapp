@@ -38,9 +38,9 @@ export function MobileDashboardMenu({ isAdmin, fullName, children }: { isAdmin: 
         </div>
       </div>
     </header>
-    <div className={`fixed inset-0 z-50 transition-opacity duration-300 ease-out lg:hidden ${open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"}`} aria-hidden={!open}>
+    <div className={`fixed inset-0 z-50 h-dvh max-h-dvh transition-opacity duration-300 ease-out lg:hidden ${open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"}`} aria-hidden={!open}>
       <button type="button" tabIndex={open ? 0 : -1} className="absolute inset-0 bg-slate-950/50 opacity-100 backdrop-blur-[2px] transition-opacity duration-300 ease-out" onClick={() => setOpen(false)} aria-label="Cerrar menú" />
-      <aside className={`relative flex h-full w-[min(86vw,320px)] flex-col border-r border-slate-200 bg-white p-5 shadow-2xl transition-transform duration-300 ease-[cubic-bezier(.22,1,.36,1)] will-change-transform dark:border-slate-800 dark:bg-slate-900 ${open ? "translate-x-0" : "-translate-x-full"}`} role="dialog" aria-modal="true" aria-label="Menú principal">
+      <aside className={`relative flex h-dvh max-h-dvh w-[min(86vw,320px)] flex-col overflow-y-auto overscroll-contain border-r border-slate-200 bg-white p-5 shadow-2xl transition-transform duration-300 ease-[cubic-bezier(.22,1,.36,1)] will-change-transform dark:border-slate-800 dark:bg-slate-900 ${open ? "translate-x-0" : "-translate-x-full"}`} role="dialog" aria-modal="true" aria-label="Menú principal">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <Brand />

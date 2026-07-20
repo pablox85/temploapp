@@ -8,8 +8,11 @@ import type { Item, Profile, UserItem } from "@/lib/types/database";
 export function AdminUserCard({ profile, profiles, items, assignments }: { profile: Profile; profiles: Profile[]; items: Item[]; assignments: UserItem[] }) {
   const assignmentByItem = useMemo(() => new Map(assignments.map((row) => [row.item_id, row])), [assignments]);
   const profileById = useMemo(() => new Map(profiles.map((entry) => [entry.id, entry])), [profiles]);
-  const assignedItem = items.find((item) => assignmentByItem.get(item.id)?.user_id === profile.id);
-  const [selectedId, setSelectedId] = useState(assignedItem?.id ?? items.find((item) => !assignmentByItem.has(item.id))?.id ?? items[0]?.id ?? "");
+  const assignedItems = useMemo(
+    () => items.filter((item) => assignmentByItem.get(item.id)?.user_id === profile.id),
+    [assignmentByItem, items, profile.id],
+  );
+  const [selectedId, setSelectedId] = useState(assignedItems[0]?.id ?? items.find((item) => !assignmentByItem.has(item.id))?.id ?? items[0]?.id ?? "");
   const effectiveSelectedId = items.some((item) => item.id === selectedId) ? selectedId : (items[0]?.id ?? "");
   const selectedAssignment = assignmentByItem.get(effectiveSelectedId);
   const selectedOwner = selectedAssignment ? profileById.get(selectedAssignment.user_id) : undefined;
@@ -19,21 +22,21 @@ export function AdminUserCard({ profile, profiles, items, assignments }: { profi
       <div className="flex items-center justify-between gap-4">
         <div className="min-w-0">
           <h3 className="truncate font-semibold text-slate-900">{profile.full_name}</h3>
-          <p className="mt-0.5 text-xs text-slate-500">{profile.role === "admin" ? "Administrador" : "Usuario"} · {assignedItem ? "1 ítem asignado" : "Sin ítem asignado"}</p>
+          <p className="mt-0.5 text-xs text-slate-500">{profile.role === "admin" ? "Administrador" : "Usuario"} · {assignedItems.length === 0 ? "Sin ítems asignados" : `${assignedItems.length} ${assignedItems.length === 1 ? "ítem asignado" : "ítems asignados"}`}</p>
         </div>
         <span className={`badge ${profile.role === "admin" ? "bg-amber-50 text-amber-700 dark:bg-amber-400/10 dark:text-amber-300" : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300"}`}>{profile.role}</span>
       </div>
 
       <div className="mt-4 flex flex-wrap gap-2">
-        {!assignedItem && <p className="text-sm text-slate-400">Sin ítem asignado.</p>}
-        {assignedItem && (
-          <span className="inline-flex items-center gap-1 rounded-full bg-teal-50 py-1 pl-3 pr-1 text-sm text-teal-800 dark:bg-teal-400/10 dark:text-teal-200">
+        {assignedItems.length === 0 && <p className="text-sm text-slate-400">Sin ítems asignados.</p>}
+        {assignedItems.map((assignedItem) => (
+          <span key={assignedItem.id} className="inline-flex items-center gap-1 rounded-full bg-teal-50 py-1 pl-3 pr-1 text-sm text-teal-800 dark:bg-teal-400/10 dark:text-teal-200">
             {assignedItem.name}
             <MutationButton action={() => removeAssignmentAction(profile.id, assignedItem.id)} pendingLabel="…" className="grid size-6 place-items-center rounded-full text-teal-700 hover:bg-teal-100" confirmMessage={`¿Quitar “${assignedItem.name}” a ${profile.full_name}?`}>
               <span aria-label="Quitar asignación">×</span>
             </MutationButton>
           </span>
-        )}
+        ))}
       </div>
 
       {items.length > 0 && (

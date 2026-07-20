@@ -24,7 +24,7 @@ export function DashboardNav({ isAdmin, mobile = false, onNavigate }: { isAdmin:
       {allLinks.map(({ href, label, icon: Icon, exact }) => {
         const active = exact ? pathname === href : pathname.startsWith(href);
         if (href === "/dashboard/items/new" && pathname !== "/dashboard" && pathname !== "/dashboard/items/new") {
-          return <CreateItemModalTrigger key={href} label={label} className={`nav-link ${mobile ? "w-full" : ""}`} />;
+          return <CreateItemModalTrigger key={href} label={label} className={`nav-link ${mobile ? "w-full" : ""}`} onOpen={onNavigate} />;
         }
         return (
           <Link key={href} href={href} onClick={onNavigate} className={`nav-link ${mobile ? "w-full" : ""} ${active ? "nav-link-active" : ""}`}>

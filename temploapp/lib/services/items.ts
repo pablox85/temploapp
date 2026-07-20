@@ -38,18 +38,20 @@ export async function getItems(userId: string): Promise<ItemWithSelection[]> {
 
 export async function getDashboardStats(userId: string) {
   const supabase = await createClient();
-  const [items, mine, assignments] = await Promise.all([
+  const [items, mine, assignments, users] = await Promise.all([
     supabase.from("items").select("id", { count: "exact", head: true }),
     supabase
       .from("user_items")
       .select("id", { count: "exact", head: true })
       .eq("user_id", userId),
     supabase.from("user_items").select("id", { count: "exact", head: true }),
+    supabase.from("profiles").select("id", { count: "exact", head: true }),
   ]);
 
   return {
     items: items.count ?? 0,
     mine: mine.count ?? 0,
     assignments: assignments.count ?? 0,
+    users: users.count ?? 0,
   };
 }

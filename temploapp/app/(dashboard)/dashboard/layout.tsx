@@ -19,7 +19,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         <div className="flex items-start justify-between gap-3 lg:px-2">
           <div className="min-w-0">
             <Brand />
-            <p className="mt-1 ml-[52px] truncate text-xs font-medium text-slate-500 dark:text-slate-400" title={displayName}>{displayName}</p>
+            <p className="mt-1 ml-13 truncate text-xs font-medium text-slate-500 dark:text-slate-400" title={displayName}>{displayName}</p>
           </div>
           <ThemeToggle />
         </div>
