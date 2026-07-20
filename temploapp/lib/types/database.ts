@@ -143,6 +143,9 @@ export type Database = {
 
 export type Tenant = Database["public"]["Tables"]["tenants"]["Row"];
 export type Profile = Omit<Database["public"]["Tables"]["profiles"]["Row"], "tenant_id">;
+export type CurrentProfile = Profile & {
+  tenants: Pick<Tenant, "name"> | null;
+};
 export type Item = Omit<Database["public"]["Tables"]["items"]["Row"], "tenant_id">;
 export type UserItem = Omit<Database["public"]["Tables"]["user_items"]["Row"], "tenant_id">;
 

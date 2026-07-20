@@ -8,6 +8,10 @@ import { MobileDashboardMenu } from "@/components/mobile-dashboard-menu";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const profile = await requireProfile();
+  const tenantName = profile.tenants?.name?.trim();
+  const displayName = tenantName
+    ? `${profile.full_name} · ${tenantName}`
+    : profile.full_name;
 
   return (
     <div className="dashboard-shell min-h-screen bg-slate-50 dark:bg-slate-950 lg:grid lg:grid-cols-[260px_1fr]">
@@ -15,7 +19,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         <div className="flex items-start justify-between gap-3 lg:px-2">
           <div className="min-w-0">
             <Brand />
-            <p className="mt-1 ml-[52px] truncate text-xs font-medium text-slate-500 dark:text-slate-400" title={profile.full_name}>{profile.full_name}</p>
+            <p className="mt-1 ml-[52px] truncate text-xs font-medium text-slate-500 dark:text-slate-400" title={displayName}>{displayName}</p>
           </div>
           <ThemeToggle />
         </div>
@@ -24,7 +28,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           <form action={signOutAction}><button className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white" aria-label="Salir"><LogOutIcon className="size-5" />Salir</button></form>
         </div>
       </aside>
-      <MobileDashboardMenu isAdmin={profile.role === "admin"} fullName={profile.full_name}>
+      <MobileDashboardMenu isAdmin={profile.role === "admin"} fullName={displayName}>
         <form action={signOutAction}><button className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white" aria-label="Salir"><LogOutIcon className="size-5" />Salir</button></form>
       </MobileDashboardMenu>
       <main className="min-w-0 p-5 sm:p-8 xl:p-10">{children}</main>

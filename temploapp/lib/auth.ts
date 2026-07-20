@@ -3,7 +3,7 @@ import "server-only";
 import { cache } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import type { Profile } from "@/lib/types/database";
+import type { CurrentProfile } from "@/lib/types/database";
 
 export const getCurrentUser = cache(async () => {
   const supabase = await createClient();
@@ -11,14 +11,14 @@ export const getCurrentUser = cache(async () => {
   return error ? null : data.user;
 });
 
-export const getCurrentProfile = cache(async (): Promise<Profile | null> => {
+export const getCurrentProfile = cache(async (): Promise<CurrentProfile | null> => {
   const user = await getCurrentUser();
   if (!user) return null;
 
   const supabase = await createClient();
   const { data } = await supabase
     .from("profiles")
-    .select("id, full_name, role, created_at")
+    .select("id, full_name, role, created_at, tenants(name)")
     .eq("id", user.id)
     .maybeSingle();
 
