@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { adminUserSchema, tenantIdSchema } from "@/lib/validation";
+import { adminUserSchema, idSchema, tenantIdSchema } from "@/lib/validation";
 
 const isDevelopment = process.env.NODE_ENV !== "production";
 
@@ -62,6 +62,10 @@ export type CreateAdminUserResult =
         >
       >;
     };
+
+export type DeleteAdminUserResult =
+  | { success: true; message: string }
+  | { success: false; message: string };
 
 export async function createAdminUserAction(
   _previousState: CreateAdminUserResult,
@@ -281,4 +285,91 @@ export async function createAdminUserAction(
       role: profile.role,
     },
   };
+}
+
+export async function deleteAdminUserAction(
+  targetUserId: string,
+): Promise<DeleteAdminUserResult> {
+  const parsedTargetId = idSchema.safeParse(targetUserId);
+  if (!parsedTargetId.success) {
+    return { success: false, message: "El usuario seleccionado no es válido." };
+  }
+
+  const sessionClient = await createClient();
+  const { data: authData, error: authError } =
+    await sessionClient.auth.getUser();
+
+  if (authError || !authData.user) {
+    return {
+      success: false,
+      message: "Sesión expirada. Inicia sesión nuevamente.",
+    };
+  }
+
+  const { data: actorProfile, error: actorProfileError } =
+    await sessionClient
+      .from("profiles")
+      .select("id, role, tenant_id")
+      .eq("id", authData.user.id)
+      .maybeSingle();
+
+  const actorTenant = tenantIdSchema.safeParse(actorProfile?.tenant_id);
+  if (
+    actorProfileError ||
+    !actorProfile ||
+    actorProfile.role !== "admin" ||
+    !actorTenant.success
+  ) {
+    return {
+      success: false,
+      message: "No tienes permisos para eliminar usuarios.",
+    };
+  }
+
+  if (parsedTargetId.data === authData.user.id) {
+    return {
+      success: false,
+      message: "No puedes eliminar tu propio usuario.",
+    };
+  }
+
+  const { data: targetProfile, error: targetProfileError } =
+    await sessionClient
+      .from("profiles")
+      .select("id, tenant_id")
+      .eq("id", parsedTargetId.data)
+      .eq("tenant_id", actorTenant.data)
+      .maybeSingle();
+
+  if (
+    targetProfileError ||
+    !targetProfile ||
+    targetProfile.tenant_id !== actorTenant.data
+  ) {
+    return {
+      success: false,
+      message: "No se encontró un usuario de tu templo con ese identificador.",
+    };
+  }
+
+  let admin: ReturnType<typeof createAdminClient>;
+  try {
+    admin = createAdminClient();
+  } catch {
+    return { success: false, message: "Error inesperado del servidor." };
+  }
+
+  const { error: deleteError } =
+    await admin.auth.admin.deleteUser(parsedTargetId.data);
+
+  if (deleteError) {
+    return { success: false, message: "No se pudo eliminar el usuario." };
+  }
+
+  revalidatePath("/dashboard/admin/users");
+  revalidatePath("/dashboard/items");
+  revalidatePath("/dashboard/my-items");
+  revalidatePath("/dashboard/admin");
+
+  return { success: true, message: "Usuario eliminado correctamente." };
 }

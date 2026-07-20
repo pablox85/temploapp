@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { CheckIcon, GridIcon, ListIcon, PlusIcon, ShieldIcon, UsersIcon } from "@/components/icons";
+import { CreateItemModalTrigger } from "@/components/create-item-modal";
 
 const links = [
   { href: "/dashboard/items", label: "Lista de ítems", icon: ListIcon, exact: true },
@@ -22,6 +23,9 @@ export function DashboardNav({ isAdmin, mobile = false, onNavigate }: { isAdmin:
     <nav aria-label="Navegación principal" className={mobile ? "space-y-1" : "flex min-w-max gap-1 lg:block lg:min-w-0 lg:space-y-1"}>
       {allLinks.map(({ href, label, icon: Icon, exact }) => {
         const active = exact ? pathname === href : pathname.startsWith(href);
+        if (href === "/dashboard/items/new" && pathname !== "/dashboard" && pathname !== "/dashboard/items/new") {
+          return <CreateItemModalTrigger key={href} label={label} className={`nav-link ${mobile ? "w-full" : ""}`} />;
+        }
         return (
           <Link key={href} href={href} onClick={onNavigate} className={`nav-link ${mobile ? "w-full" : ""} ${active ? "nav-link-active" : ""}`}>
             <Icon className="size-5" />{label}

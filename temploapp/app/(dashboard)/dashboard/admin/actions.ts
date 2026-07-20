@@ -45,6 +45,18 @@ export async function deleteItemAction(itemId: string): Promise<ActionState> {
   return { status: "success", message: "Ítem eliminado." };
 }
 
+export async function deleteItemsAction(itemIds: string[]): Promise<ActionState> {
+  await requireAdmin();
+  const ids = idSchema.array().min(1).safeParse(itemIds);
+  if (!ids.success) return { status: "error", message: "Selecciona al menos un ítem válido." };
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("items").delete().in("id", ids.data);
+  if (error) return { status: "error", message: getActionError(error) };
+  refreshAll();
+  return { status: "success", message: ids.data.length === 1 ? "Ítem eliminado." : `${ids.data.length} ítems eliminados.` };
+}
+
 export async function reassignItemAction(userId: string, itemId: string): Promise<ActionState> {
   await requireAdmin();
   const parsed = itemAssignmentSchema.safeParse({ userId, itemId });

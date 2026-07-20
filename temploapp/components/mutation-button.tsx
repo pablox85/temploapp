@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import type { ActionState } from "@/lib/action-state";
+import { ConfirmationModal } from "@/components/confirmation-modal";
 
 export function MutationButton({ action, children, pendingLabel = "Guardando…", className = "button-secondary", confirmMessage, disabled = false }: {
   action: () => Promise<ActionState>;
@@ -13,6 +14,15 @@ export function MutationButton({ action, children, pendingLabel = "Guardando…"
 }) {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState("");
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
+  function runAction() {
+    setError("");
+    startTransition(async () => {
+      const result = await action();
+      if (result.status === "error") setError(result.message);
+    });
+  }
 
   return (
     <span className="inline-flex flex-col items-end gap-1">
@@ -21,17 +31,20 @@ export function MutationButton({ action, children, pendingLabel = "Guardando…"
         disabled={pending || disabled}
         className={className}
         onClick={() => {
-          if (confirmMessage && !window.confirm(confirmMessage)) return;
-          setError("");
-          startTransition(async () => {
-            const result = await action();
-            if (result.status === "error") setError(result.message);
-          });
+          if (confirmMessage) {
+            setConfirmOpen(true);
+            return;
+          }
+          runAction();
         }}
       >
         {pending ? pendingLabel : children}
       </button>
       {error && <span className="max-w-48 text-right text-xs text-rose-600">{error}</span>}
+      <ConfirmationModal open={confirmOpen} message={confirmMessage ?? ""} onCancel={() => setConfirmOpen(false)} onConfirm={() => {
+        setConfirmOpen(false);
+        runAction();
+      }} confirmClassName={className} />
     </span>
   );
 }

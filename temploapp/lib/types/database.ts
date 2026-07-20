@@ -37,7 +37,7 @@ export type Database = {
           tenant_id: string;
           name: string;
           normalized_name: string;
-          created_by: string;
+          created_by: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -46,7 +46,7 @@ export type Database = {
           tenant_id?: string;
           name: string;
           normalized_name?: string;
-          created_by: string;
+          created_by?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -74,7 +74,7 @@ export type Database = {
           tenant_id: string;
           user_id: string;
           item_id: string;
-          assigned_by: string;
+          assigned_by: string | null;
           created_at: string;
         };
         Insert: {
@@ -82,7 +82,7 @@ export type Database = {
           tenant_id?: string;
           user_id: string;
           item_id: string;
-          assigned_by: string;
+          assigned_by?: string | null;
           created_at?: string;
         };
         Update: never;

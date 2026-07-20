@@ -14,17 +14,17 @@ export function AdminItemEditor({ item }: { item: Item }) {
   const [state, action] = useActionState(update, initialActionState);
 
   return (
-    <div className="border-b border-slate-100 p-4 last:border-0">
-      <div className="flex flex-col gap-3 md:flex-row md:items-start">
-        <form action={action} className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row">
-          <input name="name" defaultValue={item.name} required maxLength={160} className="input py-2.5" aria-label={`Editar ${item.name}`} />
-          <SubmitButton pendingLabel="Guardando…" className="button-secondary shrink-0">Guardar</SubmitButton>
+    <div className="border-b border-slate-100 px-3 py-3 last:border-0 sm:p-4">
+      <div className="flex min-w-0 items-center gap-2">
+        <form action={action} className="flex min-w-0 flex-1 items-center gap-2">
+          <input name="name" defaultValue={item.name} required maxLength={160} className="input min-w-0 py-2.5" aria-label={`Editar ${item.name}`} />
+          <SubmitButton pendingLabel="…" className="button-secondary min-h-10 shrink-0 px-3 text-xs">Guardar</SubmitButton>
         </form>
-        <MutationButton action={() => deleteItemAction(item.id)} pendingLabel="Eliminando…" className="button-danger shrink-0" confirmMessage={`¿Eliminar “${item.name}”? También se quitarán todas sus asignaciones.`}>
+        <MutationButton action={() => deleteItemAction(item.id)} pendingLabel="…" className="button-danger min-h-10 shrink-0 px-3 text-xs" confirmMessage={`¿Eliminar “${item.name}”? También se quitarán todas sus asignaciones.`}>
           <TrashIcon className="size-4" />Eliminar
         </MutationButton>
       </div>
-      <div className="mt-2"><ActionMessage state={state} /></div>
+      {state.status !== "idle" && <div className="mt-2"><ActionMessage state={state} /></div>}
     </div>
   );
 }

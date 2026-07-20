@@ -1,35 +1,58 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { deleteItemsAction } from "@/app/(dashboard)/dashboard/admin/actions";
 import { selectItemAction, unselectItemAction } from "@/app/(dashboard)/dashboard/items/actions";
-import { CheckIcon, SearchIcon, UsersIcon } from "@/components/icons";
+import { CheckIcon, SearchIcon, TrashIcon, UsersIcon } from "@/components/icons";
 import { MutationButton } from "@/components/mutation-button";
 import type { ItemWithSelection } from "@/lib/types/database";
 
-export function ItemList({ items, onlySelected = false }: { items: ItemWithSelection[]; onlySelected?: boolean }) {
+export function ItemList({ items, onlySelected = false, isAdmin = false }: { items: ItemWithSelection[]; onlySelected?: boolean; isAdmin?: boolean }) {
   const [query, setQuery] = useState("");
+  const [markedIds, setMarkedIds] = useState<ReadonlySet<string>>(new Set());
   const filtered = useMemo(() => items.filter((item) => (!onlySelected || item.is_selected) && item.name.toLocaleLowerCase().includes(query.toLocaleLowerCase())), [items, onlySelected, query]);
+  const columns = isAdmin ? "md:grid-cols-[minmax(0,1fr)_140px_minmax(170px,220px)_150px_120px]" : "md:grid-cols-[minmax(0,1fr)_140px_minmax(170px,220px)_150px]";
+  const allItemsMarked = items.length > 0 && items.every((item) => markedIds.has(item.id));
+
+  function toggleAllItems() {
+    setMarkedIds(() => {
+      if (allItemsMarked) return new Set();
+      return new Set(items.map((item) => item.id));
+    });
+  }
 
   return (
     <div className="space-y-4">
-      <div className="relative max-w-md">
-        <SearchIcon className="pointer-events-none absolute left-3.5 top-1/2 size-5 -translate-y-1/2 text-slate-400" />
-        <input value={query} onChange={(event) => setQuery(event.target.value)} className="input pl-11" placeholder="Buscar ítems…" aria-label="Buscar ítems" />
+      <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+        <div className="relative max-w-md flex-1">
+          <SearchIcon className="pointer-events-none absolute left-3.5 top-1/2 size-5 -translate-y-1/2 text-slate-400" />
+          <input value={query} onChange={(event) => setQuery(event.target.value)} className="input pl-11" placeholder="Buscar ítems…" aria-label="Buscar ítems" />
+        </div>
+        {isAdmin && markedIds.size > 0 && <div className="flex items-center gap-2 self-end sm:self-auto">
+          <button type="button" onClick={toggleAllItems} className="button-secondary min-h-10 px-3 text-xs">{allItemsMarked ? "Quitar todos" : "Marcar todos"}</button>
+          <MutationButton action={async () => {
+            const result = await deleteItemsAction([...markedIds]);
+            if (result.status === "success") setMarkedIds(new Set());
+            return result;
+          }} pendingLabel="Eliminando…" className="button-danger min-h-10 px-3" confirmMessage={`¿Eliminar ${markedIds.size === 1 ? "el ítem marcado" : `los ${markedIds.size} ítems marcados`}? También se quitarán sus asignaciones.`}>
+            <TrashIcon className="size-4" />Eliminar
+          </MutationButton>
+        </div>}
       </div>
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/[0.03]">
-        <div className="hidden grid-cols-[minmax(0,1fr)_140px_minmax(170px,220px)_150px] border-b border-slate-200 bg-slate-50/70 px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500 md:grid">
-          <span>Ítem</span><span>Selecciones</span><span>Seleccionado por</span><span className="text-right">Acción</span>
+      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/3">
+        <div className={`hidden ${columns} border-b border-slate-200 bg-slate-50/70 px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500 md:grid`}>
+          <span>Ítem</span><span className="text-center">Selecciones</span><span className="text-center">Seleccionado por</span><span className="text-center">Acción</span>{isAdmin && <span className="text-center">Marcar</span>}
         </div>
         {filtered.length === 0 ? (
           <p className="px-6 py-14 text-center text-sm text-slate-500">No hay ítems que coincidan con esta búsqueda.</p>
         ) : filtered.map((item) => (
-          <div key={item.id} className="motion-card grid gap-3 border-b border-slate-100 px-5 py-4 last:border-0 md:grid-cols-[minmax(0,1fr)_140px_minmax(170px,220px)_150px] md:items-center">
+          <div key={item.id} className={`motion-card grid gap-3 border-b border-slate-100 px-5 py-4 last:border-0 ${columns} md:items-center`}>
             <div className="min-w-0">
               <p className="truncate font-medium text-slate-900">{item.name}</p>
               <p className="mt-0.5 text-xs text-slate-400">Agregado el {new Intl.DateTimeFormat("es-UY", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(item.created_at))}</p>
             </div>
-            <span className="inline-flex items-center gap-2 text-sm text-slate-600"><UsersIcon className="size-4 text-teal-600" />{item.selection_count} {item.selection_count === 1 ? "persona" : "personas"}</span>
-            <div className="min-w-0">
+            <span className="inline-flex items-center gap-2 text-sm text-slate-600 md:justify-center"><UsersIcon className="size-4 text-teal-600" />{item.selection_count} {item.selection_count === 1 ? "persona" : "personas"}</span>
+            <div className="min-w-0 md:text-center">
               <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-400 md:hidden">Seleccionado por</span>
               <p className={`truncate text-sm font-medium ${item.is_available ? "text-teal-600 dark:text-teal-400" : "text-slate-600 dark:text-slate-300"}`} title={item.assigned_profile?.full_name ?? undefined}>
                 {item.is_available
@@ -37,7 +60,7 @@ export function ItemList({ items, onlySelected = false }: { items: ItemWithSelec
                   : item.assigned_profile?.full_name || "Seleccionado"}
               </p>
             </div>
-            <div className="text-right">
+            <div className="text-right md:text-center">
               {item.is_selected ? (
                 <MutationButton action={() => unselectItemAction(item.id)} pendingLabel="Quitando…" className="button-secondary border-teal-200 text-teal-700">
                   <CheckIcon className="size-4" />Quitar
@@ -50,6 +73,16 @@ export function ItemList({ items, onlySelected = false }: { items: ItemWithSelec
                 </MutationButton>
               )}
             </div>
+            {isAdmin && <label className="grid size-9 place-items-center rounded-lg transition hover:bg-teal-50 focus-within:ring-2 focus-within:ring-teal-500/20 dark:hover:bg-teal-400/10 md:justify-self-center" title={`Marcar ${item.name}`}>
+              <input type="checkbox" checked={markedIds.has(item.id)} onChange={(event) => setMarkedIds((current) => {
+                const next = new Set(current);
+                if (event.target.checked) next.add(item.id);
+                else next.delete(item.id);
+                return next;
+              })} className="peer sr-only" aria-label={`Marcar ${item.name}`} />
+              <span className="grid size-5 place-items-center rounded-md border border-slate-300 bg-white text-white shadow-sm transition peer-checked:border-teal-500 peer-checked:bg-teal-500 peer-focus-visible:ring-2 peer-focus-visible:ring-teal-400/40 after:content-['✓'] after:text-xs after:font-bold after:opacity-0 after:transition-opacity peer-checked:after:opacity-100 dark:border-slate-600 dark:bg-slate-800" />
+              <span className="md:sr-only">Marcar</span>
+            </label>}
           </div>
         ))}
       </div>
