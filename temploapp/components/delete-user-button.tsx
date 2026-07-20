@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { ConfirmationModal } from "@/components/confirmation-modal";
 import {
   deleteAdminUserAction,
   type DeleteAdminUserResult,
@@ -15,16 +16,19 @@ export function DeleteUserButton({
 }) {
   const [pending, startTransition] = useTransition();
   const [result, setResult] = useState<DeleteAdminUserResult | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   function handleDelete() {
     if (pending) return;
 
-    const confirmed = window.confirm(
-      `¿Eliminar definitivamente a “${userName}”? Esta acción no se puede deshacer.`,
-    );
-    if (!confirmed) return;
+    setConfirmOpen(true);
+  }
+
+  function confirmDelete() {
+    if (pending) return;
 
     setResult(null);
+    setConfirmOpen(false);
     startTransition(async () => {
       setResult(await deleteAdminUserAction(userId));
     });
@@ -49,6 +53,14 @@ export function DeleteUserButton({
           {result.message}
         </p>
       )}
+      <ConfirmationModal
+        open={confirmOpen}
+        message={`¿Eliminar definitivamente a “${userName}”? Esta acción no se puede deshacer.`}
+        onCancel={() => setConfirmOpen(false)}
+        onConfirm={confirmDelete}
+        confirmClassName="button-danger"
+        confirmLabel="Eliminar usuario"
+      />
     </div>
   );
 }
