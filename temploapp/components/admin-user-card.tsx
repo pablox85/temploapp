@@ -18,7 +18,7 @@ export function AdminUserCard({ profile, profiles, items, assignments }: { profi
   const selectedOwner = selectedAssignment ? profileById.get(selectedAssignment.user_id) : undefined;
 
   return (
-    <article className="motion-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/[0.03]">
+    <article className="motion-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/3">
       <div className="flex items-center justify-between gap-4">
         <div className="min-w-0">
           <h3 className="truncate font-semibold text-slate-900">{profile.full_name}</h3>
@@ -47,7 +47,7 @@ export function AdminUserCard({ profile, profiles, items, assignments }: { profi
               return <option key={item.id} value={item.id}>{item.name}{owner ? ` — asignado a ${owner.full_name}` : " — disponible"}</option>;
             })}
           </select>
-          <MutationButton action={() => reassignItemAction(profile.id, effectiveSelectedId)} pendingLabel="Reasignando…" className="button-primary shrink-0" confirmMessage={`¿Reasignar “${items.find((item) => item.id === effectiveSelectedId)?.name ?? "este ítem"}” a ${profile.full_name}${selectedOwner && selectedOwner.id !== profile.id ? `? Se liberará de ${selectedOwner.full_name}` : "?"}`}>Reasignar</MutationButton>
+          <MutationButton action={() => reassignItemAction(profile.id, effectiveSelectedId)} pendingLabel="Asignando…" className="button-primary shrink-0" confirmMessage={`¿Asignar “${items.find((item) => item.id === effectiveSelectedId)?.name ?? "este ítem"}” a ${profile.full_name}${selectedOwner && selectedOwner.id !== profile.id ? `? Se liberará de ${selectedOwner.full_name}` : "?"}`}>Asignar</MutationButton>
         </div>
       )}
     </article>

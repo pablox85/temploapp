@@ -21,7 +21,7 @@ export default async function AdminPage() {
           </section>
         }
         usersContent={
-          <section className="mt-6"><div className="mb-5"><h2 className="text-xl font-bold text-slate-950">Usuarios y asignaciones</h2><p className="mt-1 text-sm text-slate-500">Reasigna un ítem disponible u ocupado; cada persona puede tener varios.</p></div><div className="grid gap-4 xl:grid-cols-2">{profiles.map((profile) => <AdminUserCard key={profile.id} profile={profile} profiles={profiles} items={items} assignments={assignments} />)}</div></section>
+          <section className="mt-6"><div className="mb-5"><h2 className="text-xl font-bold text-slate-950">Usuarios y asignaciones</h2><p className="mt-1 text-sm text-slate-500">Asigna un ítem disponible u ocupado; cada persona puede tener varios.</p></div><div className="grid gap-4 xl:grid-cols-2">{profiles.map((profile) => <AdminUserCard key={profile.id} profile={profile} profiles={profiles} items={items} assignments={assignments} />)}</div></section>
         }
       />
     </div>

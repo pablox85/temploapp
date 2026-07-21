@@ -12,7 +12,7 @@ const links = [
 ];
 
 function getLinks(isAdmin: boolean) {
-  return isAdmin ? [...links, { href: "/dashboard/admin", label: "Panel admin", icon: ShieldIcon, exact: true }, { href: "/dashboard/admin/users", label: "Usuarios", icon: UsersIcon, exact: true }] : links;
+  return isAdmin ? [...links, { href: "/dashboard/admin", label: "Administracion", icon: ShieldIcon, exact: true }, { href: "/dashboard/admin/users", label: "Usuarios", icon: UsersIcon, exact: true }] : links;
 }
 
 export function DashboardNav({ isAdmin, mobile = false, onNavigate }: { isAdmin: boolean; mobile?: boolean; onNavigate?: () => void }) {
