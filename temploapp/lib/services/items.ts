@@ -48,10 +48,14 @@ export async function getDashboardStats(userId: string) {
     supabase.from("profiles").select("id", { count: "exact", head: true }),
   ]);
 
+  const totalItems = items.count ?? 0;
+  const totalAssignments = assignments.count ?? 0;
+
   return {
-    items: items.count ?? 0,
+    items: totalItems,
+    availableItems: Math.max(0, totalItems - totalAssignments),
     mine: mine.count ?? 0,
-    assignments: assignments.count ?? 0,
+    assignments: totalAssignments,
     users: users.count ?? 0,
   };
 }

@@ -16,8 +16,8 @@ export default async function AdminPage() {
       <AdminTabs
         itemsContent={
           <section className="mt-6 grid gap-6 xl:grid-cols-[1fr_1.5fr]">
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm shadow-slate-900/[0.03]"><h2 className="text-lg font-semibold text-slate-900">Crear ítem</h2><p className="mb-5 mt-1 text-sm text-slate-500">Agrega una opción a la lista global.</p><CreateItemForm compact /></div>
-            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/[0.03]"><div className="border-b border-slate-200 px-5 py-4"><h2 className="text-lg font-semibold text-slate-900">Administrar ítems</h2><p className="mt-1 text-sm text-slate-500">{items.length} ítems en total</p></div>{items.length ? items.map((item) => <AdminItemEditor key={item.id} item={item} />) : <p className="p-8 text-center text-sm text-slate-500">La lista está vacía.</p>}</div>
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm shadow-slate-900/3"><h2 className="text-lg font-semibold text-slate-900">Crear ítem</h2><p className="mb-5 mt-1 text-sm text-slate-500">Agrega una opción a la lista global.</p><CreateItemForm compact /></div>
+            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/3"><div className="border-b border-slate-200 px-5 py-4"><h2 className="text-lg font-semibold text-slate-900">Administrar ítems</h2><p className="mt-1 text-sm text-slate-500">{items.length} ítems en total</p></div>{items.length ? items.map((item) => <AdminItemEditor key={item.id} item={item} />) : <p className="p-8 text-center text-sm text-slate-500">La lista está vacía.</p>}</div>
           </section>
         }
         usersContent={

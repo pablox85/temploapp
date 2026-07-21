@@ -7,10 +7,36 @@ import { CheckIcon, SearchIcon, TrashIcon, UsersIcon } from "@/components/icons"
 import { MutationButton } from "@/components/mutation-button";
 import type { ItemWithSelection } from "@/lib/types/database";
 
-export function ItemList({ items, onlySelected = false, isAdmin = false }: { items: ItemWithSelection[]; onlySelected?: boolean; isAdmin?: boolean }) {
+type AssignmentFilter = "all" | "available" | "selected";
+
+export function ItemList({ items, onlySelected = false, isAdmin = false, initialAssignmentFilter = "all" }: {
+  items: ItemWithSelection[];
+  onlySelected?: boolean;
+  isAdmin?: boolean;
+  initialAssignmentFilter?: AssignmentFilter;
+}) {
   const [query, setQuery] = useState("");
   const [markedIds, setMarkedIds] = useState<ReadonlySet<string>>(new Set());
-  const filtered = useMemo(() => items.filter((item) => (!onlySelected || item.is_selected) && item.name.toLocaleLowerCase().includes(query.toLocaleLowerCase())), [items, onlySelected, query]);
+  const [assignmentFilter, setAssignmentFilter] = useState<AssignmentFilter>(initialAssignmentFilter);
+  const [ownerId, setOwnerId] = useState("all");
+  const owners = useMemo(() => {
+    const uniqueOwners = new Map<string, NonNullable<ItemWithSelection["assigned_profile"]>>();
+    items.forEach((item) => {
+      if (item.assigned_profile?.full_name) uniqueOwners.set(item.assigned_profile.id, item.assigned_profile);
+    });
+    return [...uniqueOwners.values()].sort((a, b) => a.full_name.localeCompare(b.full_name, "es"));
+  }, [items]);
+  const filtered = useMemo(() => items.filter((item) => {
+    const matchesSearch = item.name.toLocaleLowerCase().includes(query.toLocaleLowerCase());
+    const matchesSelection = !onlySelected || item.is_selected;
+    const matchesAction = assignmentFilter === "all"
+      || (assignmentFilter === "available" && item.is_available)
+      || (assignmentFilter === "selected" && !item.is_available);
+    const matchesOwner = ownerId === "all"
+      || (ownerId === "unassigned" && item.assigned_profile === null)
+      || item.assigned_profile?.id === ownerId;
+    return matchesSearch && matchesSelection && matchesAction && matchesOwner;
+  }), [assignmentFilter, items, onlySelected, ownerId, query]);
   const columns = isAdmin ? "md:grid-cols-[minmax(0,1fr)_140px_minmax(170px,220px)_150px_120px]" : "md:grid-cols-[minmax(0,1fr)_140px_minmax(170px,220px)_150px]";
   const allItemsMarked = items.length > 0 && items.every((item) => markedIds.has(item.id));
 
@@ -24,9 +50,28 @@ export function ItemList({ items, onlySelected = false, isAdmin = false }: { ite
   return (
     <div className="space-y-4">
       <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-        <div className="relative max-w-md flex-1">
-          <SearchIcon className="pointer-events-none absolute left-3.5 top-1/2 size-5 -translate-y-1/2 text-slate-400" />
-          <input value={query} onChange={(event) => setQuery(event.target.value)} className="input pl-11" placeholder="Buscar ítems…" aria-label="Buscar ítems" />
+        <div className="flex flex-1 flex-col gap-3 lg:flex-row lg:items-center">
+          <div className="relative max-w-md flex-1">
+            <SearchIcon className="pointer-events-none absolute left-3.5 top-1/2 size-5 -translate-y-1/2 text-slate-400" />
+            <input value={query} onChange={(event) => setQuery(event.target.value)} className="input pl-11" placeholder="Buscar ítems…" aria-label="Buscar ítems" />
+          </div>
+          {!onlySelected && <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+            <div className="w-full sm:w-auto">
+              <label className="mb-1 block text-center text-xs font-semibold text-slate-500 dark:text-slate-400" htmlFor="item-action-filter">Artículos</label>
+              <select id="item-action-filter" value={assignmentFilter} onChange={(event) => setAssignmentFilter(event.target.value as AssignmentFilter)} className="input min-w-48 py-2.5" aria-label="Filtrar por artículos">
+                <option value="all">Todos</option>
+                <option value="available">Disponibles</option>
+                <option value="selected">Seleccionados</option>
+              </select>
+            </div>
+            <div className="w-full sm:w-auto">
+              <label className="mb-1 block text-center text-xs font-semibold text-slate-500 dark:text-slate-400" htmlFor="item-owner-filter">Usuarios</label>
+              <select id="item-owner-filter" value={ownerId} onChange={(event) => setOwnerId(event.target.value)} className="input min-w-52 py-2.5" aria-label="Filtrar por usuarios">
+                <option value="all">Todos</option>
+                {owners.map((owner) => <option key={owner.id} value={owner.id}>{owner.full_name}</option>)}
+              </select>
+            </div>
+          </div>}
         </div>
         {isAdmin && markedIds.size > 0 && <div className="flex items-center gap-2 self-end sm:self-auto">
           <button type="button" onClick={toggleAllItems} className="button-secondary min-h-10 px-3 text-xs">{allItemsMarked ? "Quitar todos" : "Marcar todos"}</button>
