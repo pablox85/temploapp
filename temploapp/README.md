@@ -60,6 +60,17 @@ La clave pública puede aparecer como `anon` o como publishable key según la ve
 
 Con `NEXT_PUBLIC_USE_DEMO_DATA=true`, la pantalla de administración sigue disponible para visualizar usuarios, pero bloquea las altas y los cambios de rol con un mensaje claro. No se crean usuarios ni se actualizan roles en Supabase.
 
+### Usuario demo
+
+Para probar la aplicación se puede utilizar la siguiente cuenta de demostración:
+
+```text
+Email: demo@demo.com
+Contraseña: demo123
+```
+
+La cuenta debe estar creada en **Supabase → Authentication → Users** y tener un registro asociado en `public.profiles`. Estas credenciales son únicamente para desarrollo o demostraciones; deben cambiarse o eliminarse antes de publicar una instalación real.
+
 ## Base de datos
 
 La migración inicial está en [`supabase/migrations/20260715000000_initial_schema.sql`](supabase/migrations/20260715000000_initial_schema.sql). Puedes aplicarla de una de estas formas:
@@ -120,7 +131,7 @@ Los usuarios posteriores nacen con rol `user`. Un administrador puede crearlos d
 | `items` UPDATE / DELETE | No | Sí |
 | `user_items` SELECT | Sí, para contadores colaborativos | Sí |
 | `user_items` INSERT / DELETE | Solo filas propias | Cualquier usuario |
-| `profiles` SELECT | Solo perfil propio | Todos |
+| `profiles` SELECT | Perfiles del tenant actual | Perfiles del tenant actual |
 | `profiles` UPDATE | No | Sí |
 
 Aunque las acciones del servidor hacen comprobaciones explícitas, no sustituyen RLS. Si alguien invoca una acción manualmente, PostgreSQL sigue aplicando las políticas.
@@ -151,6 +162,6 @@ Vercel detectará Next.js automáticamente. No se necesita ninguna clave privada
 ## Decisiones importantes
 
 - La normalización de nombres se aplica únicamente a los ítems para impedir duplicados; no participa en la autenticación.
-- Los datos de `user_items` son legibles por usuarios autenticados para calcular conteos globales. Los perfiles relacionados no se exponen salvo al propio usuario o a un admin.
+- Los datos de `user_items` y los nombres de perfiles están aislados por tenant mediante RLS. La aplicación muestra únicamente los campos necesarios para la lista compartida.
 - El borrado de un ítem elimina sus asignaciones mediante `ON DELETE CASCADE`.
 - `assigned_by` siempre debe ser el usuario autenticado, incluso cuando un admin asigna a otra persona.
