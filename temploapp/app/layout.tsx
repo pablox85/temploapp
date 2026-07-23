@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
+import { MicrosoftClarity } from "@/components/microsoft-clarity";
 import "./globals.css";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
@@ -17,7 +18,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="es" suppressHydrationWarning className={`${geistSans.variable} ${geistMono.variable} dark`}>
       <head><script dangerouslySetInnerHTML={{ __html: themeScript }} /></head>
-      <body>{children}<Analytics /></body>
+      <body>{children}<Analytics /><MicrosoftClarity /></body>
     </html>
   );
 }

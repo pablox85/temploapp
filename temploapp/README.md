@@ -1,81 +1,79 @@
 # TemploAPP
 
-MVP de lista colaborativa construido con Next.js 16 (App Router), TypeScript, Tailwind CSS 4 y Supabase. La autorización vive en PostgreSQL mediante Row Level Security; el frontend nunca utiliza `service_role`.
+TemploAPP es una aplicación colaborativa para organizar ítems dentro de una comunidad. Permite ver la lista compartida, crear ítems, conocer su disponibilidad y administrarlos según el rol de cada persona.
 
-## Funcionalidad
-
-- Inicio de sesión estándar con email y contraseña mediante Supabase Auth.
-- Lista global con búsqueda, contador de selecciones y selección múltiple.
-- Creación de ítems por cualquier usuario autenticado.
-- Normalización y prevención de duplicados en la base de datos.
-- Vista personal para quitar únicamente las selecciones propias.
-- Panel admin con CRUD de ítems y edición de asignaciones por usuario.
-- UI responsive, estados de carga/error y Server Actions validadas con Zod.
-
-## Arquitectura
-
-```text
-app/
-├── (auth)/login/                 # acceso y acción de autenticación
-└── (dashboard)/dashboard/
-    ├── admin/                    # administración y acciones privilegiadas
-    ├── items/                    # lista, alta y acciones de selección
-    └── my-items/                 # selección del usuario
-components/                       # UI reutilizable y componentes cliente mínimos
-lib/
-├── services/                     # consultas y composición de datos
-├── supabase/                     # clientes SSR y renovación de sesión
-└── types/                        # tipos del esquema PostgreSQL
-supabase/migrations/              # esquema, triggers, constraints y RLS
-proxy.ts                          # renovación de sesión y protección de rutas
-```
-
-Los Server Components cargan datos directamente. Las mutaciones pasan por Server Actions, vuelven a comprobar la identidad y se ejecutan con la sesión del usuario. RLS es la barrera de autorización definitiva.
-
-## Requisitos
-
-- Node.js 22 o posterior
-- npm
-- Un proyecto de Supabase
-- Supabase CLI (opcional, recomendado para migraciones locales/remotas)
-
-## Instalación
-
-```bash
-npm install
-cp .env.example .env.local
-```
-
-Completa `.env.local` con los valores de **Project Settings → API** en Supabase:
-
-```env
-NEXT_PUBLIC_SUPABASE_URL=https://TU_PROYECTO.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=TU_CLAVE_PUBLICA
-SUPABASE_SERVICE_ROLE_KEY=TU_CLAVE_SERVICE_ROLE_SOLO_SERVIDOR
-```
-
-La clave pública puede aparecer como `anon` o como publishable key según la versión del panel. `SUPABASE_SERVICE_ROLE_KEY` solo se usa en Server Actions y nunca debe exponerse al navegador.
-
-### Modo demo
-
-Con `NEXT_PUBLIC_USE_DEMO_DATA=true`, la pantalla de administración sigue disponible para visualizar usuarios, pero bloquea las altas y los cambios de rol con un mensaje claro. No se crean usuarios ni se actualizan roles en Supabase.
-
-### Usuario demo
-
-Para probar la aplicación se puede utilizar la siguiente cuenta de demostración:
+## Demo
 
 ```text
 Email: demo@demo.com
 Contraseña: demo123
 ```
 
-La cuenta debe estar creada en **Supabase → Authentication → Users** y tener un registro asociado en `public.profiles`. Estas credenciales son únicamente para desarrollo o demostraciones; deben cambiarse o eliminarse antes de publicar una instalación real.
+La cuenta demo debe existir en el proyecto de Supabase utilizado por la aplicación.
+
+## Qué permite hacer
+
+- Iniciar sesión con email y contraseña.
+- Ver, buscar y filtrar ítems de la lista compartida.
+- Crear nuevos ítems sin duplicados.
+- Seleccionar o liberar ítems propios.
+- Ver quién seleccionó un ítem dentro del tenant.
+- Consultar estadísticas de ítems, selecciones y usuarios.
+- Usar la aplicación desde escritorio o móvil, con modo oscuro.
+
+### Administración
+
+Las personas con rol administrador pueden:
+
+- Editar y eliminar ítems.
+- Gestionar asignaciones.
+- Crear usuarios.
+- Cambiar roles.
+- Consultar los usuarios y sus ítems asignados.
+
+## Tecnologías
+
+- [Next.js](https://nextjs.org/) con App Router
+- [TypeScript](https://www.typescriptlang.org/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [Supabase](https://supabase.com/) para Auth, PostgreSQL y RLS
+- [Vercel](https://vercel.com/) para despliegue
+
+## Ejecutar el proyecto
+
+### Requisitos
+
+- Node.js 22 o superior
+- npm
+- Un proyecto de Supabase
+
+Si usas nvm, desde la carpeta del proyecto ejecuta `nvm use`; el archivo `.nvmrc` selecciona Node 22.
+
+### Instalación
+
+```bash
+npm install
+cp .env.example .env.local
+npm run dev
+```
+
+### Variables de entorno
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://TU_PROYECTO.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=TU_CLAVE_PUBLICA
+SUPABASE_SERVICE_ROLE_KEY=TU_CLAVE_PRIVADA_SOLO_SERVIDOR
+NEXT_PUBLIC_USE_DEMO_DATA=false
+NEXT_PUBLIC_CLARITY_PROJECT_ID=TU_ID_DE_PROYECTO_CLARITY
+```
+
+La clave `SUPABASE_SERVICE_ROLE_KEY` es exclusivamente para operaciones server-side y nunca debe exponerse en el navegador.
+
+`NEXT_PUBLIC_CLARITY_PROJECT_ID` es opcional. Al configurarlo, Clarity se inicializa únicamente en el navegador; obtén el valor en **Microsoft Clarity → Settings → Overview**. Si no se define, no se carga ningún script de Clarity.
 
 ## Base de datos
 
-La migración inicial está en [`supabase/migrations/20260715000000_initial_schema.sql`](supabase/migrations/20260715000000_initial_schema.sql). Puedes aplicarla de una de estas formas:
-
-### Supabase CLI
+Las migraciones están en [`supabase/migrations`](supabase/migrations). Ejecútalas en orden con Supabase CLI:
 
 ```bash
 supabase login
@@ -83,85 +81,38 @@ supabase link --project-ref TU_PROJECT_REF
 supabase db push
 ```
 
-### SQL Editor
+También puedes aplicarlas desde el SQL Editor de Supabase.
 
-Copia el contenido de cada migración en **SQL Editor** y ejecútalas una vez, respetando el orden de sus nombres.
+La base utiliza Row Level Security para aislar los datos por tenant y proteger todas las acciones de administración.
 
-La migración crea:
+## Roles
 
-- `profiles`, `items` y `user_items`.
-- Enum `app_role` (`admin | user`).
-- `UNIQUE(items.normalized_name)` y `UNIQUE(user_id, item_id)`.
-- Trigger de normalización de nombres de ítems para impedir duplicados.
-- Trigger de creación automática de perfiles y backfill de usuarios existentes.
-- Índices, grants y todas las políticas RLS.
-
-## Crear usuarios y el primer administrador
-
-Las personas inician sesión con el email y la contraseña registrados en Supabase Auth. Un administrador puede crear usuarios desde `Panel admin`; la acción valida la sesión contra `profiles`, crea la cuenta mediante Supabase Admin y asigna el rol después de que el trigger cree el perfil. Si falla el perfil, elimina solo el usuario creado en esa ejecución.
-
-Para crear la primera cuenta:
-
-1. Ve a **Supabase → Authentication → Users → Add user → Create new user**.
-2. Escribe el email real, elige una contraseña y activa la confirmación automática.
-3. Opcionalmente, en **User metadata**, agrega el nombre visible:
-
-   ```json
-   { "full_name": "Juan Pérez" }
-   ```
-
-El trigger genera el perfil. Si no proporcionas `full_name`, utiliza la parte anterior a `@` del email como nombre visible inicial.
-
-Después de crear la primera cuenta, promuévela desde SQL Editor:
-
-```sql
-update public.profiles
-set role = 'admin'
-where full_name = 'Juan Pérez';
-```
-
-Los usuarios posteriores nacen con rol `user`. Un administrador puede crearlos desde `/dashboard/admin/users`, indicando nombre visible, email, contraseña y rol. Un usuario normal solo puede leer su perfil.
-
-## Seguridad RLS
-
-| Recurso | Usuario autenticado | Admin |
+| Acción | Usuario | Administrador |
 | --- | --- | --- |
-| `items` SELECT | Todos | Todos |
-| `items` INSERT | Sí, como sí mismo | Sí, como sí mismo |
-| `items` UPDATE / DELETE | No | Sí |
-| `user_items` SELECT | Sí, para contadores colaborativos | Sí |
-| `user_items` INSERT / DELETE | Solo filas propias | Cualquier usuario |
-| `profiles` SELECT | Perfiles del tenant actual | Perfiles del tenant actual |
-| `profiles` UPDATE | No | Sí |
+| Ver ítems del tenant | Sí | Sí |
+| Crear ítems | Sí | Sí |
+| Seleccionar o liberar ítems propios | Sí | Sí |
+| Editar o eliminar ítems | No | Sí |
+| Reasignar ítems | No | Sí |
+| Gestionar usuarios y roles | No | Sí |
 
-Aunque las acciones del servidor hacen comprobaciones explícitas, no sustituyen RLS. Si alguien invoca una acción manualmente, PostgreSQL sigue aplicando las políticas.
-
-## Desarrollo y comprobaciones
+## Comprobaciones
 
 ```bash
-npm run dev
 npm run lint
 npm run typecheck
+npm test
 npm run build
 ```
 
-Abre [http://localhost:3000](http://localhost:3000).
-
 ## Despliegue en Vercel
 
-1. Sube el repositorio a GitHub, GitLab o Bitbucket.
-2. Importa el proyecto en Vercel y selecciona `temploapp` como **Root Directory** si el repositorio contiene una carpeta superior.
-3. Añade `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` y `SUPABASE_SERVICE_ROLE_KEY` en **Settings → Environment Variables** para Production, Preview y Development. La última es privada y no debe tener prefijo `NEXT_PUBLIC_`.
-4. Despliega.
-5. En Supabase, configura **Authentication → URL Configuration**:
-   - Site URL: `https://tu-dominio.vercel.app`
-   - Redirect URL: `https://tu-dominio.vercel.app/**`
+1. Importa el repositorio en Vercel.
+2. Agrega las variables de entorno de Supabase.
+3. Ejecuta las migraciones en Supabase.
+4. Configura la URL de producción en **Supabase Auth → URL Configuration**.
+5. Despliega.
 
-Vercel detectará Next.js automáticamente. No se necesita ninguna clave privada ni un servidor adicional.
+## Licencia
 
-## Decisiones importantes
-
-- La normalización de nombres se aplica únicamente a los ítems para impedir duplicados; no participa en la autenticación.
-- Los datos de `user_items` y los nombres de perfiles están aislados por tenant mediante RLS. La aplicación muestra únicamente los campos necesarios para la lista compartida.
-- El borrado de un ítem elimina sus asignaciones mediante `ON DELETE CASCADE`.
-- `assigned_by` siempre debe ser el usuario autenticado, incluso cuando un admin asigna a otra persona.
+Proyecto privado de TemploAPP.
