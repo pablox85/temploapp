@@ -6,7 +6,7 @@ import { getItems } from "@/lib/services/items";
 
 export default async function MyItemsPage() {
   const profile = await requireProfile();
-  const items = await getItems(profile.id);
+  const items = await getItems(profile.id, profile.role === "admin");
   const selected = items.filter((item) => item.is_selected);
   return (
     <div className="mx-auto max-w-7xl">

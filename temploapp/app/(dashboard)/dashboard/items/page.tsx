@@ -8,7 +8,7 @@ type ItemFilter = "available" | "selected";
 export default async function ItemsPage({ searchParams }: { searchParams: Promise<{ filter?: string }> }) {
   const params = await searchParams;
   const profile = await requireProfile();
-  const items = await getItems(profile.id);
+  const items = await getItems(profile.id, profile.role === "admin");
   const filter: ItemFilter | null = params.filter === "available" || params.filter === "selected" ? params.filter : null;
   const heading = filter === "available" ? "Ítems disponibles" : filter === "selected" ? "Ítems seleccionados" : "Todos los ítems";
   const description = filter === "available"

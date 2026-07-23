@@ -3,7 +3,7 @@ import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import type { ItemWithSelection } from "@/lib/types/database";
 
-export async function getItems(userId: string): Promise<ItemWithSelection[]> {
+export async function getItems(userId: string, canViewAllAssignees: boolean): Promise<ItemWithSelection[]> {
   const supabase = await createClient();
   const { data: items, error } = await supabase
     .from("items")
@@ -25,13 +25,14 @@ export async function getItems(userId: string): Promise<ItemWithSelection[]> {
 
   return (items ?? []).map(({ user_items, ...item }) => {
     const assignment = user_items;
+    const isSelectedByViewer = assignment?.user_id === userId;
 
     return {
       ...item,
       selection_count: assignment === null ? 0 : 1,
-      is_selected: assignment?.user_id === userId,
+      is_selected: isSelectedByViewer,
       is_available: assignment === null,
-      assigned_profile: assignment?.profiles ?? null,
+      assigned_profile: canViewAllAssignees || isSelectedByViewer ? assignment?.profiles ?? null : null,
     };
   });
 }
