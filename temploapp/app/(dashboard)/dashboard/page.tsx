@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { CreateItemForm } from "@/components/create-item-form";
-import { CheckIcon, ListIcon, PlusIcon, UsersIcon } from "@/components/icons";
+import { CheckIcon, ListIcon, PlusIcon, SparklesIcon, UsersIcon } from "@/components/icons";
 import { StatCard } from "@/components/stat-card";
 import { requireProfile } from "@/lib/auth";
 import { getDashboardStats } from "@/lib/services/items";
@@ -18,11 +18,12 @@ export default async function DashboardPage() {
       </header>
 
       <section className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-        <StatCard href="/dashboard/items" label="Total Items" value={stats.items} detail="En lista" icon={ListIcon} />
-        <StatCard href="/dashboard/items?filter=available" label="Ítems disponibles" value={stats.availableItems} detail="Total menos seleccionados" icon={ListIcon} tone="teal" />
-        <StatCard href="/dashboard/my-items" label="Mi selección" value={stats.mine} detail="Ítems seleccionados por ti" icon={CheckIcon} tone="violet" />
-        <StatCard href="/dashboard/items?filter=selected" label="Items seleccionados" value={stats.assignments} detail="Entre todos los usuarios" icon={UsersIcon} tone="amber" />
-        <StatCard href={profile.role === "admin" ? "/dashboard/admin/users" : undefined} label="Usuarios" value={stats.users} detail="Miembros del tenant actual" icon={UsersIcon} tone="blue" />
+        <StatCard href="/dashboard/items" label="Total Items" value={stats.items} icon={ListIcon} />
+        <StatCard href="/dashboard/items?filter=available" label="Ítems disp" value={stats.availableItems} icon={ListIcon} tone="teal" />
+        <StatCard href="/dashboard/my-items" label="Mi selección" value={stats.mine} icon={CheckIcon} tone="violet" />
+        <StatCard href="/dashboard/items?filter=selected" label="Items selec..." value={stats.assignments} icon={UsersIcon} tone="amber" />
+        <StatCard href={profile.role === "admin" ? "/dashboard/admin/users" : undefined} label="Usuarios" value={stats.users} icon={UsersIcon} tone="blue" />
+        {profile.role === "admin" && <StatCard href="/dashboard/extras" label="Extras" value={stats.extras} detail="Listas adicionales" icon={SparklesIcon} tone="violet" />}
       </section>
 
       <section className="mt-8 grid gap-6 lg:grid-cols-[1.4fr_.8fr]">

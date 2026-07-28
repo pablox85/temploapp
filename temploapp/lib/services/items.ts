@@ -40,7 +40,7 @@ export async function getItems(userId: string, canViewAllAssignees: boolean): Pr
 
 export async function getDashboardStats(userId: string) {
   const supabase = await createClient();
-  const [items, mine, assignments, users] = await Promise.all([
+  const [items, mine, assignments, users, extraLists] = await Promise.all([
     supabase.from("items").select("id", { count: "exact", head: true }),
     supabase
       .from("user_items")
@@ -48,6 +48,7 @@ export async function getDashboardStats(userId: string) {
       .eq("user_id", userId),
     supabase.from("user_items").select("id", { count: "exact", head: true }),
     supabase.from("profiles").select("id", { count: "exact", head: true }),
+    supabase.from("extra_lists").select("id", { count: "exact", head: true }),
   ]);
 
   const totalItems = items.count ?? 0;
@@ -59,5 +60,6 @@ export async function getDashboardStats(userId: string) {
     mine: mine.count ?? 0,
     assignments: totalAssignments,
     users: users.count ?? 0,
+    extras: extraLists.count ?? 0,
   };
 }

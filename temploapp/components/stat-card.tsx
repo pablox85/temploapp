@@ -4,7 +4,7 @@ import Link from "next/link";
 export function StatCard({ label, value, detail, icon: Icon, tone = "teal", href }: {
   label: string;
   value: number;
-  detail: string;
+  detail?: string;
   icon: ComponentType<SVGProps<SVGSVGElement>>;
   tone?: "teal" | "violet" | "amber" | "blue";
   href?: string;
@@ -16,7 +16,7 @@ export function StatCard({ label, value, detail, icon: Icon, tone = "teal", href
         <div><p className="text-sm font-medium text-slate-500">{label}</p><p className="mt-2 text-3xl font-bold tracking-tight text-slate-900">{value}</p></div>
         <span className={`grid size-11 place-items-center rounded-xl ${tones[tone]}`}><Icon className="size-5" /></span>
       </div>
-      <p className="mt-3 text-xs text-slate-400">{detail}</p>
+      {detail && <p className="mt-3 text-xs text-slate-400">{detail}</p>}
     </div>
   );
   return href ? <Link href={href} aria-label={`${label}: ${value}`} className="block">{content}</Link> : content;

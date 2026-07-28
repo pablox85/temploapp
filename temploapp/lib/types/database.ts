@@ -7,6 +7,7 @@ export type Json =
   | Json[];
 
 export type AppRole = "admin" | "user";
+export type ExtraListType = "checklist" | "inventory" | "notes";
 
 export type Database = {
   public: {
@@ -24,6 +25,34 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "profiles_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      extra_lists: {
+        Row: {
+          id: string;
+          tenant_id: string;
+          name: string;
+          list_type: ExtraListType;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          tenant_id?: string;
+          name: string;
+          list_type: ExtraListType;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Update: never;
+        Relationships: [
+          {
+            foreignKeyName: "extra_lists_tenant_id_fkey";
             columns: ["tenant_id"];
             isOneToOne: false;
             referencedRelation: "tenants";
@@ -153,13 +182,14 @@ export type Database = {
         Returns: number;
       };
     };
-    Enums: { app_role: AppRole };
+    Enums: { app_role: AppRole; extra_list_type: ExtraListType };
     CompositeTypes: { [_ in never]: never };
   };
 };
 
 export type Tenant = Database["public"]["Tables"]["tenants"]["Row"];
 export type Profile = Omit<Database["public"]["Tables"]["profiles"]["Row"], "tenant_id">;
+export type ExtraList = Omit<Database["public"]["Tables"]["extra_lists"]["Row"], "tenant_id">;
 export type CurrentProfile = Profile & {
   tenants: Pick<Tenant, "name"> | null;
 };

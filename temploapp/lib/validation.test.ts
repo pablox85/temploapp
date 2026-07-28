@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { tenantIdSchema } from "@/lib/validation";
+import { extraListSchema, tenantIdSchema } from "@/lib/validation";
 
 describe("tenantIdSchema", () => {
   it("accepts the seeded PostgreSQL tenant UUID", () => {
@@ -18,5 +18,19 @@ describe("tenantIdSchema", () => {
 
   it("rejects malformed tenant identifiers", () => {
     expect(tenantIdSchema.safeParse("not-a-uuid").success).toBe(false);
+  });
+});
+
+describe("extraListSchema", () => {
+  it("cleans the name and accepts a supported list type", () => {
+    expect(
+      extraListSchema.parse({ name: "  Tareas   del evento ", type: "checklist" }),
+    ).toEqual({ name: "Tareas del evento", type: "checklist" });
+  });
+
+  it("rejects unsupported list types", () => {
+    expect(
+      extraListSchema.safeParse({ name: "Otra lista", type: "calendar" }).success,
+    ).toBe(false);
   });
 });

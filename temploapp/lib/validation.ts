@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { EXTRA_LIST_TYPES } from "@/lib/extra-lists";
 
 export const itemNameSchema = z
   .string()
@@ -52,4 +53,16 @@ export const profileRoleChangeSchema = z.object({
 export const itemAssignmentSchema = z.object({
   userId: idSchema,
   itemId: idSchema,
+});
+
+export const extraListSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(1, "Escribe un nombre para la lista.")
+    .max(120, "El nombre no puede superar los 120 caracteres.")
+    .transform((value) => value.replace(/\s+/g, " ")),
+  type: z.enum(EXTRA_LIST_TYPES.map((type) => type.value), {
+    message: "Selecciona un tipo de lista válido.",
+  }),
 });
