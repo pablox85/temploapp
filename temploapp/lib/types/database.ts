@@ -37,6 +37,9 @@ export type Database = {
           tenant_id: string;
           name: string;
           normalized_name: string;
+          is_purchased: boolean;
+          purchased_by: string | null;
+          purchased_at: string | null;
           created_by: string | null;
           created_at: string;
           updated_at: string;
@@ -46,11 +49,21 @@ export type Database = {
           tenant_id?: string;
           name: string;
           normalized_name?: string;
+          is_purchased?: boolean;
+          purchased_by?: string | null;
+          purchased_at?: string | null;
           created_by?: string | null;
           created_at?: string;
           updated_at?: string;
         };
-        Update: { name?: string; normalized_name?: string; updated_at?: string };
+        Update: {
+          name?: string;
+          normalized_name?: string;
+          is_purchased?: boolean;
+          purchased_by?: string | null;
+          purchased_at?: string | null;
+          updated_at?: string;
+        };
         Relationships: [
           {
             foreignKeyName: "items_created_by_fkey";
@@ -135,6 +148,10 @@ export type Database = {
       current_tenant_id: { Args: Record<PropertyKey, never>; Returns: string };
       is_admin: { Args: Record<PropertyKey, never>; Returns: boolean };
       normalize_item_name: { Args: { value: string }; Returns: string };
+      set_items_purchase_state: {
+        Args: { target_item_ids: string[]; purchased: boolean };
+        Returns: number;
+      };
     };
     Enums: { app_role: AppRole };
     CompositeTypes: { [_ in never]: never };
@@ -149,7 +166,7 @@ export type CurrentProfile = Profile & {
 export type Item = Omit<Database["public"]["Tables"]["items"]["Row"], "tenant_id">;
 export type UserItem = Omit<Database["public"]["Tables"]["user_items"]["Row"], "tenant_id">;
 
-export type ItemWithSelection = Item & {
+export type ItemWithSelection = Omit<Item, "purchased_by" | "purchased_at"> & {
   selection_count: number;
   is_selected: boolean;
   is_available: boolean;

@@ -11,6 +11,7 @@ export async function getItems(userId: string, canViewAllAssignees: boolean): Pr
       id,
       name,
       normalized_name,
+      is_purchased,
       created_by,
       created_at,
       updated_at,

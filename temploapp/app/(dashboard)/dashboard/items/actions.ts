@@ -70,3 +70,37 @@ export async function unselectItemAction(itemId: string): Promise<ActionState> {
   refreshItemViews();
   return { status: "success", message: "Selección quitada." };
 }
+
+export async function setItemsPurchaseStateAction(
+  itemIds: string[],
+  purchased: boolean,
+): Promise<ActionState> {
+  await requireUser();
+  const parsedIds = idSchema.array().min(1).max(100).safeParse(itemIds);
+  if (!parsedIds.success || typeof purchased !== "boolean") {
+    return { status: "error", message: "Selecciona entre 1 y 100 ítems válidos." };
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("set_items_purchase_state", {
+    target_item_ids: [...new Set(parsedIds.data)],
+    purchased,
+  });
+
+  if (error) {
+    if (error.code === "42501") return { status: "error", message: "Solo puedes cambiar el estado de tus propios ítems." };
+    if (error.code === "P0003") return { status: "error", message: "Uno o más ítems no existen en tu tenant." };
+    if (error.code === "28000") return { status: "error", message: "Sesión expirada. Inicia sesión nuevamente." };
+    if (error.code === "22023") return { status: "error", message: "La selección de ítems es inválida." };
+    return { status: "error", message: getActionError(error) };
+  }
+
+  refreshItemViews();
+  const count = data ?? 0;
+  return {
+    status: "success",
+    message: purchased
+      ? count === 1 ? "Ítem marcado como comprado." : `${count} ítems marcados como comprados.`
+      : count === 1 ? "Ítem desmarcado como comprado." : `${count} ítems desmarcados como comprados.`,
+  };
+}

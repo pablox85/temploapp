@@ -28,7 +28,7 @@ export async function getAdminData(): Promise<AdminData> {
     supabase.from("profiles").select("id, full_name, role, created_at").order("full_name"),
     supabase
       .from("items")
-      .select("id, name, normalized_name, created_by, created_at, updated_at")
+      .select("id, name, normalized_name, is_purchased, purchased_by, purchased_at, created_by, created_at, updated_at")
       .order("name"),
     supabase
       .from("user_items")

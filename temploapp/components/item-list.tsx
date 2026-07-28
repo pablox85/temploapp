@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { deleteItemsAction } from "@/app/(dashboard)/dashboard/admin/actions";
-import { selectItemAction, unselectItemAction } from "@/app/(dashboard)/dashboard/items/actions";
+import { selectItemAction, setItemsPurchaseStateAction, unselectItemAction } from "@/app/(dashboard)/dashboard/items/actions";
 import { CheckIcon, SearchIcon, TrashIcon, UsersIcon } from "@/components/icons";
 import { MutationButton } from "@/components/mutation-button";
 import type { ItemWithSelection } from "@/lib/types/database";
@@ -17,7 +17,6 @@ export function ItemList({ items, onlySelected = false, isAdmin = false, initial
 }) {
   const [query, setQuery] = useState("");
   const [markedIds, setMarkedIds] = useState<ReadonlySet<string>>(new Set());
-  const [purchasedIds, setPurchasedIds] = useState<ReadonlySet<string>>(new Set());
   const [assignmentFilter, setAssignmentFilter] = useState<AssignmentFilter>(initialAssignmentFilter);
   const [ownerId, setOwnerId] = useState("all");
   const owners = useMemo(() => {
@@ -40,11 +39,11 @@ export function ItemList({ items, onlySelected = false, isAdmin = false, initial
   }), [assignmentFilter, items, onlySelected, ownerId, query]);
   const columns = "md:grid-cols-[minmax(0,1fr)_140px_minmax(170px,220px)_150px_88px]";
   const allItemsMarked = items.length > 0 && items.every((item) => markedIds.has(item.id));
-  const purchasableMarkedIds = items
-    .filter((item) => markedIds.has(item.id) && (isAdmin || item.is_selected))
-    .map((item) => item.id);
-  const allPurchasableMarkedItemsPurchased = purchasableMarkedIds.length > 0
-    && purchasableMarkedIds.every((itemId) => purchasedIds.has(itemId));
+  const purchasableMarkedItems = items
+    .filter((item) => markedIds.has(item.id) && (isAdmin || item.is_selected));
+  const purchasableMarkedIds = purchasableMarkedItems.map((item) => item.id);
+  const allPurchasableMarkedItemsPurchased = purchasableMarkedItems.length > 0
+    && purchasableMarkedItems.every((item) => item.is_purchased);
 
   function toggleAllItems() {
     setMarkedIds(() => {
@@ -53,21 +52,7 @@ export function ItemList({ items, onlySelected = false, isAdmin = false, initial
     });
   }
 
-  function markSelectedAsPurchased() {
-    setPurchasedIds((current) => new Set([...current, ...purchasableMarkedIds]));
-    setMarkedIds((current) => {
-      const next = new Set(current);
-      purchasableMarkedIds.forEach((itemId) => next.delete(itemId));
-      return next;
-    });
-  }
-
-  function unmarkSelectedAsPurchased() {
-    setPurchasedIds((current) => {
-      const next = new Set(current);
-      purchasableMarkedIds.forEach((itemId) => next.delete(itemId));
-      return next;
-    });
+  function clearProcessedMarks() {
     setMarkedIds((current) => {
       const next = new Set(current);
       purchasableMarkedIds.forEach((itemId) => next.delete(itemId));
@@ -106,9 +91,13 @@ export function ItemList({ items, onlySelected = false, isAdmin = false, initial
             {allItemsMarked ? "Quitar todos" : "Marcar todos"}
           </button>
           {purchasableMarkedIds.length > 0 && <>
-            <button type="button" onClick={allPurchasableMarkedItemsPurchased ? unmarkSelectedAsPurchased : markSelectedAsPurchased} className={allPurchasableMarkedItemsPurchased ? "button-secondary min-h-10 px-3" : "button-primary min-h-10 px-3"}>
+            <MutationButton action={async () => {
+              const result = await setItemsPurchaseStateAction(purchasableMarkedIds, !allPurchasableMarkedItemsPurchased);
+              if (result.status === "success") clearProcessedMarks();
+              return result;
+            }} pendingLabel="Guardando…" className={allPurchasableMarkedItemsPurchased ? "button-secondary min-h-10 px-3" : "button-primary min-h-10 px-3"}>
               {allPurchasableMarkedItemsPurchased ? "Descomprar" : <><CheckIcon className="size-4" />Comprado</>}
-            </button>
+            </MutationButton>
             {isAdmin &&
             <MutationButton action={async () => {
               const result = await deleteItemsAction([...markedIds]);
@@ -129,7 +118,7 @@ export function ItemList({ items, onlySelected = false, isAdmin = false, initial
           <p className="px-6 py-14 text-center text-sm text-slate-500">No hay ítems que coincidan con esta búsqueda.</p>
         ) : filtered.map((item) => {
           const isMarked = markedIds.has(item.id);
-          const isPurchased = purchasedIds.has(item.id);
+          const isPurchased = item.is_purchased;
 
           return <div key={item.id} className={`motion-card grid gap-3 border-b border-slate-100 px-5 py-4 transition-opacity duration-200 last:border-0 ${columns} ${isMarked || isPurchased ? "opacity-60" : "opacity-100"} md:items-center`}>
             <div className="min-w-0">
