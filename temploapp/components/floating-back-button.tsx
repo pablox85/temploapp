@@ -146,7 +146,7 @@ export function FloatingBackButton() {
     router.push("/dashboard");
   }
 
-  if (!position) return null;
+  if (!pathname.startsWith("/dashboard") || !position) return null;
 
   return (
     <button
