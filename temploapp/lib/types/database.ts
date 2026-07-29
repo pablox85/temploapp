@@ -19,9 +19,9 @@ export type Database = {
         Relationships: [];
       };
       profiles: {
-        Row: { id: string; tenant_id: string; full_name: string; role: AppRole; created_at: string };
-        Insert: { id: string; tenant_id?: string; full_name: string; role?: AppRole; created_at?: string };
-        Update: { full_name?: string; role?: AppRole };
+        Row: { id: string; tenant_id: string; full_name: string; role: AppRole; items_last_seen_at: string; created_at: string };
+        Insert: { id: string; tenant_id?: string; full_name: string; role?: AppRole; items_last_seen_at?: string; created_at?: string };
+        Update: { full_name?: string; role?: AppRole; items_last_seen_at?: string };
         Relationships: [
           {
             foreignKeyName: "profiles_tenant_id_fkey";
@@ -234,6 +234,7 @@ export type Database = {
         Args: { target_item_ids: string[]; purchased: boolean };
         Returns: number;
       };
+      mark_items_notifications_seen: { Args: Record<PropertyKey, never>; Returns: string };
     };
     Enums: { app_role: AppRole; extra_list_type: ExtraListType };
     CompositeTypes: { [_ in never]: never };

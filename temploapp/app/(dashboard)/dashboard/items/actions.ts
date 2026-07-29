@@ -33,6 +33,16 @@ export async function createItemAction(
   return { status: "success", message: `“${parsed.data}” fue agregado.` };
 }
 
+export async function markItemsNotificationsSeenAction(): Promise<ActionState> {
+  await requireUser();
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("mark_items_notifications_seen");
+
+  if (error) return { status: "error", message: getActionError(error) };
+  revalidatePath("/dashboard", "layout");
+  return { status: "success", message: "Notificaciones actualizadas." };
+}
+
 export async function selectItemAction(itemId: string): Promise<ActionState> {
   await requireUser();
   const parsedId = idSchema.safeParse(itemId);

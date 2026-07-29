@@ -15,7 +15,7 @@ export async function listAdminProfiles(): Promise<AdminUserListItem[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, full_name, role, created_at")
+    .select("id, full_name, role, items_last_seen_at, created_at")
     .order("created_at", { ascending: false });
 
   if (error) throw new Error("No se pudo cargar el listado de usuarios.");
@@ -25,7 +25,7 @@ export async function listAdminProfiles(): Promise<AdminUserListItem[]> {
 export async function getAdminData(): Promise<AdminData> {
   const supabase = await createClient();
   const [profiles, items, assignments] = await Promise.all([
-    supabase.from("profiles").select("id, full_name, role, created_at").order("full_name"),
+    supabase.from("profiles").select("id, full_name, role, items_last_seen_at, created_at").order("full_name"),
     supabase
       .from("items")
       .select("id, name, normalized_name, is_purchased, purchased_by, purchased_at, created_by, created_at, updated_at")

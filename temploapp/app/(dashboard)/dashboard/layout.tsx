@@ -5,6 +5,8 @@ import { signOutAction } from "@/app/(auth)/login/actions";
 import { requireProfile } from "@/lib/auth";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { MobileDashboardMenu } from "@/components/mobile-dashboard-menu";
+import { ItemNotifications } from "@/components/item-notifications";
+import { getUnreadItemsNotificationCount } from "@/lib/services/items";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const profile = await requireProfile();
@@ -12,6 +14,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const displayName = tenantName
     ? `${profile.full_name} · ${tenantName}`
     : profile.full_name;
+  const unreadItemsCount = await getUnreadItemsNotificationCount(profile.items_last_seen_at);
 
   return (
     <div className="dashboard-shell min-h-screen bg-slate-50 dark:bg-slate-950 lg:grid lg:grid-cols-[260px_1fr]">
@@ -32,6 +35,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         <form action={signOutAction}><button className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white" aria-label="Salir"><LogOutIcon className="size-5" />Salir</button></form>
       </MobileDashboardMenu>
       <main className="min-w-0 p-5 sm:p-8 xl:p-10">{children}</main>
+      <ItemNotifications unreadCount={unreadItemsCount} />
     </div>
   );
 }
