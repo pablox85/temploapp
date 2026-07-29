@@ -66,3 +66,45 @@ export const extraListSchema = z.object({
     message: "Selecciona un tipo de lista válido.",
   }),
 });
+
+const extraEntryTitleSchema = z
+  .string()
+  .trim()
+  .min(1, "Escribe un nombre.")
+  .max(200, "El nombre no puede superar los 200 caracteres.")
+  .transform((value) => value.replace(/\s+/g, " "));
+
+export const inventoryEntrySchema = z.object({
+  listId: idSchema,
+  title: extraEntryTitleSchema,
+  quantity: z.coerce.number().int("La cantidad debe ser un número entero.").min(1, "La cantidad mínima es 1.").max(999999, "La cantidad máxima es 999999."),
+});
+
+export const inventoryQuantitySchema = z.object({
+  listId: idSchema,
+  entryId: idSchema,
+  quantity: z.number().int().min(0).max(999999),
+});
+
+export const checklistEntrySchema = z.object({
+  listId: idSchema,
+  title: extraEntryTitleSchema,
+});
+
+export const checklistStatusSchema = z.object({
+  listId: idSchema,
+  entryId: idSchema,
+  completed: z.boolean(),
+});
+
+export const notesEntrySchema = z.object({
+  listId: idSchema,
+  title: extraEntryTitleSchema,
+  content: z.string().trim().min(1, "Escribe el contenido de la nota.").max(5000, "La nota no puede superar los 5000 caracteres."),
+});
+
+export const extraEntryDeleteSchema = z.object({
+  listId: idSchema,
+  entryId: idSchema,
+  entryType: z.enum(["inventory", "checklist", "notes"]),
+});

@@ -60,6 +60,59 @@ export type Database = {
           },
         ];
       };
+      extra_list_entries: {
+        Row: {
+          id: string;
+          tenant_id: string;
+          list_id: string;
+          entry_type: ExtraListType;
+          title: string;
+          content: string | null;
+          quantity: number | null;
+          is_completed: boolean | null;
+          position: number;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          tenant_id?: string;
+          list_id: string;
+          entry_type: ExtraListType;
+          title: string;
+          content?: string | null;
+          quantity?: number | null;
+          is_completed?: boolean | null;
+          position?: number;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          title?: string;
+          content?: string | null;
+          quantity?: number | null;
+          is_completed?: boolean | null;
+          position?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "extra_list_entries_list_fkey";
+            columns: ["tenant_id", "list_id", "entry_type"];
+            isOneToOne: false;
+            referencedRelation: "extra_lists";
+            referencedColumns: ["tenant_id", "id", "list_type"];
+          },
+          {
+            foreignKeyName: "extra_list_entries_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       items: {
         Row: {
           id: string;
@@ -190,6 +243,24 @@ export type Database = {
 export type Tenant = Database["public"]["Tables"]["tenants"]["Row"];
 export type Profile = Omit<Database["public"]["Tables"]["profiles"]["Row"], "tenant_id">;
 export type ExtraList = Omit<Database["public"]["Tables"]["extra_lists"]["Row"], "tenant_id">;
+export type ExtraListEntry = Omit<Database["public"]["Tables"]["extra_list_entries"]["Row"], "tenant_id">;
+export type InventoryListEntry = Pick<ExtraListEntry, "id" | "list_id" | "title" | "created_at" | "updated_at"> & {
+  entry_type: "inventory";
+  quantity: number;
+};
+export type ChecklistListEntry = Pick<ExtraListEntry, "id" | "list_id" | "title" | "created_at" | "updated_at"> & {
+  entry_type: "checklist";
+  is_completed: boolean;
+};
+export type NotesListEntry = Pick<ExtraListEntry, "id" | "list_id" | "title" | "created_at" | "updated_at"> & {
+  entry_type: "notes";
+  content: string;
+};
+export type ExtraListEntries = {
+  inventory: InventoryListEntry[];
+  checklist: ChecklistListEntry[];
+  notes: NotesListEntry[];
+};
 export type CurrentProfile = Profile & {
   tenants: Pick<Tenant, "name"> | null;
 };

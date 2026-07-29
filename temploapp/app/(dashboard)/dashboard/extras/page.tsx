@@ -1,4 +1,5 @@
 import { CreateExtraListForm } from "@/components/create-extra-list-form";
+import { DeleteExtraListButton } from "@/components/delete-extra-list-button";
 import { SparklesIcon } from "@/components/icons";
 import { requireAdmin } from "@/lib/auth";
 import { EXTRA_LIST_TYPE_BADGE_CLASSES, getExtraListTypeLabel } from "@/lib/extra-lists";
@@ -36,10 +37,19 @@ export default async function ExtrasPage() {
           ) : (
             <div className="grid gap-4 sm:grid-cols-2">
               {lists.map((list) => (
-                <article key={list.id} className="motion-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/3 dark:border-slate-800 dark:bg-slate-900">
-                  <div className="flex items-start justify-between gap-4">
+                <article key={list.id} className="motion-card group relative rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/3 hover:border-teal-300 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-teal-700">
+                  <a
+                    href={`/dashboard/extras/${encodeURIComponent(list.name)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="absolute inset-0 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-950"
+                    aria-label={`Abrir lista ${list.name} en una nueva pestaña`}
+                  >
+                    <span className="sr-only">Abrir {list.name}</span>
+                  </a>
+                  <div className="pointer-events-none relative flex items-start justify-between gap-4">
                     <div className="min-w-0">
-                      <h3 className="truncate font-semibold text-slate-900 dark:text-white">{list.name}</h3>
+                      <h3 className="truncate font-semibold text-slate-900 transition group-hover:text-teal-700 dark:text-white dark:group-hover:text-teal-300">{list.name}</h3>
                       <p className="mt-1 text-xs text-slate-400">
                         Creada el {new Intl.DateTimeFormat("es-UY", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(list.created_at))}
                       </p>
@@ -47,6 +57,18 @@ export default async function ExtrasPage() {
                     <span className={`badge shrink-0 ${EXTRA_LIST_TYPE_BADGE_CLASSES[list.list_type]}`}>
                       {getExtraListTypeLabel(list.list_type)}
                     </span>
+                  </div>
+                  <div className="relative z-10 mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4 dark:border-slate-800">
+                    <a
+                      href={`/dashboard/extras/${encodeURIComponent(list.name)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm font-semibold text-teal-600 transition hover:text-teal-700 dark:text-teal-400 dark:hover:text-teal-300"
+                      aria-label={`Abrir lista ${list.name} en una nueva pestaña`}
+                    >
+                      Abrir lista <span aria-hidden="true">↗</span>
+                    </a>
+                    <DeleteExtraListButton listId={list.id} listName={list.name} />
                   </div>
                 </article>
               ))}
