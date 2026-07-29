@@ -23,6 +23,7 @@ export async function updateSession(request: NextRequest) {
   const { data } = await supabase.auth.getClaims();
   const isAuthRoute = request.nextUrl.pathname.startsWith("/login");
   const isProtectedRoute = request.nextUrl.pathname.startsWith("/dashboard");
+  const hasProfileError = request.nextUrl.searchParams.get("error") === "profile";
 
   if (!data?.claims && isProtectedRoute) {
     const url = request.nextUrl.clone();
@@ -31,7 +32,10 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (data?.claims && isAuthRoute) {
+  // Keep an authenticated member on the login page when the server could not
+  // load their profile. Redirecting them to Dashboard here would create an
+  // endless /dashboard -> /login?error=profile loop.
+  if (data?.claims && isAuthRoute && !hasProfileError) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
     url.search = "";

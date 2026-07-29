@@ -1,5 +1,6 @@
 import { ItemList } from "@/components/item-list";
 import { CreateItemModalTrigger } from "@/components/create-item-modal";
+import { ItemsRealtime } from "@/components/items-realtime";
 import { requireProfile } from "@/lib/auth";
 import { getItems } from "@/lib/services/items";
 
@@ -19,6 +20,7 @@ export default async function ItemsPage({ searchParams }: { searchParams: Promis
 
   return (
     <div className="mx-auto max-w-7xl">
+      <ItemsRealtime tenantId={profile.tenant_id} />
       <header className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div><p className="text-sm font-semibold text-teal-600">LISTA COLABORATIVA</p><h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-950">{heading}</h1><p className="mt-2 text-slate-500">{description}</p></div>
         <CreateItemModalTrigger />

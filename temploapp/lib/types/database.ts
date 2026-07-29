@@ -263,6 +263,7 @@ export type ExtraListEntries = {
   notes: NotesListEntry[];
 };
 export type CurrentProfile = Profile & {
+  tenant_id: string;
   tenants: Pick<Tenant, "name"> | null;
 };
 export type Item = Omit<Database["public"]["Tables"]["items"]["Row"], "tenant_id">;

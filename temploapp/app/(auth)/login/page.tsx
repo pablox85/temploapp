@@ -31,7 +31,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
           <p className="text-sm font-semibold text-teal-400">BIENVENIDO</p>
           <h2 className="mt-2 text-3xl font-bold tracking-tight text-slate-50">Inicia sesión</h2>
           <p className="mt-3 text-slate-400">Ingresa tu email y contraseña para continuar.</p>
-          {params.error === "profile" && <p className="mt-5 rounded-xl border border-amber-400/20 bg-amber-400/10 p-3 text-sm text-amber-200">Tu cuenta no tiene un perfil asociado. Contacta a un administrador.</p>}
+          {params.error === "profile" && <p className="mt-5 rounded-xl border border-amber-400/20 bg-amber-400/10 p-3 text-sm text-amber-200">No se pudo cargar tu perfil. Contacta a un administrador.</p>}
           <div className="login-card mt-8 rounded-2xl border border-slate-700/80 bg-slate-950/70 p-6 shadow-2xl shadow-black/20 backdrop-blur sm:p-8">
             <LoginForm redirectTo={params.redirectTo ?? "/dashboard"} />
           </div>
