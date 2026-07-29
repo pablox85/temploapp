@@ -1,6 +1,7 @@
 export type ActionState = {
   status: "idle" | "success" | "error";
   message: string;
+  itemId?: string;
 };
 
 export const initialActionState: ActionState = { status: "idle", message: "" };

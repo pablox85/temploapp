@@ -6,11 +6,17 @@ import { ActionMessage } from "@/components/action-message";
 import { PlusIcon } from "@/components/icons";
 import { SubmitButton } from "@/components/submit-button";
 import { initialActionState } from "@/lib/action-state";
+import { rememberNewItem } from "@/lib/items/new-item";
 
 export function CreateItemForm({ compact = false, onSuccess }: { compact?: boolean; onSuccess?: () => void }) {
   const [state, action] = useActionState(createItemAction, initialActionState);
   const formRef = useRef<HTMLFormElement>(null);
-  useEffect(() => { if (state.status === "success") { formRef.current?.reset(); onSuccess?.(); } }, [onSuccess, state]);
+  useEffect(() => {
+    if (state.status !== "success" || !state.itemId) return;
+    rememberNewItem(state.itemId);
+    formRef.current?.reset();
+    onSuccess?.();
+  }, [onSuccess, state]);
 
   return (
     <form ref={formRef} action={action} className={compact ? "space-y-3" : "space-y-5"}>

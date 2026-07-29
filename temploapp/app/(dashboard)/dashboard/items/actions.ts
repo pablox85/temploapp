@@ -23,14 +23,18 @@ export async function createItemAction(
   if (!parsed.success) return { status: "error", message: parsed.error.issues[0].message };
 
   const supabase = await createClient();
-  const { error } = await supabase.from("items").insert({
-    name: parsed.data,
-    created_by: user.id,
-  });
+  const { data, error } = await supabase
+    .from("items")
+    .insert({
+      name: parsed.data,
+      created_by: user.id,
+    })
+    .select("id")
+    .single();
 
   if (error) return { status: "error", message: getActionError(error) };
   refreshItemViews();
-  return { status: "success", message: `“${parsed.data}” fue agregado.` };
+  return { status: "success", message: `“${parsed.data}” fue agregado.`, itemId: data.id };
 }
 
 export async function markItemsNotificationsSeenAction(): Promise<ActionState> {

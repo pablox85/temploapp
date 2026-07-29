@@ -1,24 +1,47 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { deleteItemsAction } from "@/app/(dashboard)/dashboard/admin/actions";
 import { selectItemAction, setItemsPurchaseStateAction, unselectItemAction } from "@/app/(dashboard)/dashboard/items/actions";
 import { CheckIcon, SearchIcon, TrashIcon, UsersIcon } from "@/components/icons";
 import { MutationButton } from "@/components/mutation-button";
+import { clearNewItemIds, getNewItemIds, NEW_ITEM_CREATED_EVENT } from "@/lib/items/new-item";
 import type { ItemWithSelection } from "@/lib/types/database";
 
 type AssignmentFilter = "all" | "available" | "selected";
 
-export function ItemList({ items, onlySelected = false, isAdmin = false, initialAssignmentFilter = "all" }: {
+export function ItemList({ items, onlySelected = false, isAdmin = false, initialAssignmentFilter = "all", initialNewItemIds = [] }: {
   items: ItemWithSelection[];
   onlySelected?: boolean;
   isAdmin?: boolean;
   initialAssignmentFilter?: AssignmentFilter;
+  initialNewItemIds?: readonly string[];
 }) {
   const [query, setQuery] = useState("");
   const [markedIds, setMarkedIds] = useState<ReadonlySet<string>>(new Set());
+  const [newItemIds, setNewItemIds] = useState<ReadonlySet<string>>(
+    () => new Set([...getNewItemIds(), ...initialNewItemIds]),
+  );
   const [assignmentFilter, setAssignmentFilter] = useState<AssignmentFilter>(initialAssignmentFilter);
   const [ownerId, setOwnerId] = useState("all");
+  useEffect(() => {
+    function handleNewItem(event: Event) {
+      const itemId = (event as CustomEvent<string>).detail;
+      if (typeof itemId !== "string" || itemId.length === 0) return;
+      setNewItemIds((current) => new Set([...current, itemId]));
+    }
+    function handlePageHide() {
+      clearNewItemIds();
+    }
+
+    window.addEventListener(NEW_ITEM_CREATED_EVENT, handleNewItem);
+    window.addEventListener("pagehide", handlePageHide);
+    return () => {
+      window.removeEventListener(NEW_ITEM_CREATED_EVENT, handleNewItem);
+      window.removeEventListener("pagehide", handlePageHide);
+      clearNewItemIds();
+    };
+  }, []);
   const owners = useMemo(() => {
     const uniqueOwners = new Map<string, NonNullable<ItemWithSelection["assigned_profile"]>>();
     items.forEach((item) => {
@@ -118,9 +141,10 @@ export function ItemList({ items, onlySelected = false, isAdmin = false, initial
           <p className="px-6 py-14 text-center text-sm text-slate-500">No hay ítems que coincidan con esta búsqueda.</p>
         ) : filtered.map((item) => {
           const isMarked = markedIds.has(item.id);
+          const isNew = newItemIds.has(item.id);
           const isPurchased = item.is_purchased;
 
-          return <div key={item.id} className={`motion-card grid gap-3 border-b border-slate-100 px-5 py-4 transition-opacity duration-200 last:border-0 ${columns} ${isMarked || isPurchased ? "opacity-60" : "opacity-100"} md:items-center`}>
+          return <div key={item.id} className={`motion-card grid gap-3 border-b border-slate-100 px-5 py-4 transition duration-200 last:border-0 ${columns} ${isMarked || isPurchased ? "opacity-60" : "opacity-100"} ${isNew ? "bg-teal-50/60 ring-1 ring-inset ring-teal-400/40 dark:bg-teal-400/5" : ""} md:items-center`}>
             <div className="min-w-0">
               <div className="flex min-w-0 items-center gap-2">
                 <p className="truncate font-medium text-slate-900 dark:text-slate-100">{item.name}</p>
@@ -128,6 +152,8 @@ export function ItemList({ items, onlySelected = false, isAdmin = false, initial
                   <span className="shrink-0 rounded-full bg-teal-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-teal-700 dark:bg-teal-400/15 dark:text-teal-300">Comprado</span>
                 ) : isMarked ? (
                   <span className="shrink-0 rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-600 dark:bg-slate-700 dark:text-slate-200">Marcado</span>
+                ) : isNew ? (
+                  <span className="shrink-0 rounded-full bg-teal-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-teal-700 dark:bg-teal-400/15 dark:text-teal-300">Nuevo</span>
                 ) : null}
               </div>
               <p className="mt-0.5 text-xs text-slate-400">Agregado el {new Intl.DateTimeFormat("es-UY", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(item.created_at))}</p>

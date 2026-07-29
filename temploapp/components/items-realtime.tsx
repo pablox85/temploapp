@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { rememberNewItem } from "@/lib/items/new-item";
 import { createClient } from "@/lib/supabase/client";
 
 type ItemsRealtimeProps = {
@@ -117,6 +118,9 @@ export function ItemsRealtime({ tenantId }: ItemsRealtimeProps) {
             filter: tenantFilter,
           },
           (payload) => {
+            if (typeof payload.new.id === "string") {
+              rememberNewItem(payload.new.id);
+            }
             scheduleRefresh("items", payload.eventType, payload);
           },
         )

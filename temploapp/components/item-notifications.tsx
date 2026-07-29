@@ -6,14 +6,27 @@ import { usePathname, useRouter } from "next/navigation";
 import { markItemsNotificationsSeenAction } from "@/app/(dashboard)/dashboard/items/actions";
 import { BellIcon } from "@/components/icons";
 
-export function ItemNotifications({ unreadCount }: { unreadCount: number }) {
+export function ItemNotifications({
+  unreadCount,
+  unreadVersion,
+}: {
+  unreadCount: number;
+  unreadVersion: string | null;
+}) {
   const pathname = usePathname();
   const router = useRouter();
   const acknowledgementStarted = useRef(false);
-  const [acknowledgedCount, setAcknowledgedCount] = useState<number | null>(null);
+  const [acknowledgedVersion, setAcknowledgedVersion] = useState<string | null>(null);
 
   useEffect(() => {
-    if (pathname !== "/dashboard/items" || acknowledgementStarted.current) return;
+    if (
+      pathname !== "/dashboard/items"
+      || unreadCount === 0
+      || unreadVersion === null
+      || acknowledgedVersion === unreadVersion
+      || acknowledgementStarted.current
+    ) return;
+
     acknowledgementStarted.current = true;
 
     void markItemsNotificationsSeenAction().then((result) => {
@@ -21,14 +34,18 @@ export function ItemNotifications({ unreadCount }: { unreadCount: number }) {
         // The dashboard layout can retain its previous server payload during
         // client navigation. Hide this already-acknowledged notification while
         // router.refresh obtains the updated unread count.
-        setAcknowledgedCount(unreadCount);
+        setAcknowledgedVersion(unreadVersion);
         router.refresh();
       }
-      else acknowledgementStarted.current = false;
+      acknowledgementStarted.current = false;
     });
-  }, [pathname, router, unreadCount]);
+  }, [acknowledgedVersion, pathname, router, unreadCount, unreadVersion]);
 
-  if (unreadCount === 0 || pathname === "/dashboard/items" || acknowledgedCount === unreadCount) return null;
+  if (
+    unreadCount === 0
+    || pathname === "/dashboard/items"
+    || acknowledgedVersion === unreadVersion
+  ) return null;
 
   return (
     <Link

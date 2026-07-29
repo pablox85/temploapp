@@ -1,6 +1,5 @@
 import { ItemList } from "@/components/item-list";
 import { CreateItemModalTrigger } from "@/components/create-item-modal";
-import { ItemsRealtime } from "@/components/items-realtime";
 import { requireProfile } from "@/lib/auth";
 import { getItems } from "@/lib/services/items";
 
@@ -14,6 +13,10 @@ export default async function ItemsPage({ searchParams }: { searchParams: Promis
     tenantId: profile.tenant_id,
   });
   const items = await getItems(profile.id, profile.role === "admin");
+  const lastSeenAt = new Date(profile.items_last_seen_at).getTime();
+  const initialNewItemIds = items
+    .filter((item) => new Date(item.created_at).getTime() > lastSeenAt)
+    .map((item) => item.id);
   const filter: ItemFilter | null = params.filter === "available" || params.filter === "selected" ? params.filter : null;
   const heading = filter === "available" ? "Ítems disponibles" : filter === "selected" ? "Ítems seleccionados" : "Todos los ítems";
   const description = filter === "available"
@@ -24,12 +27,17 @@ export default async function ItemsPage({ searchParams }: { searchParams: Promis
 
   return (
     <div className="mx-auto max-w-7xl">
-      <ItemsRealtime tenantId={profile.tenant_id} />
       <header className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div><p className="text-sm font-semibold text-teal-600">LISTA COLABORATIVA</p><h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-950">{heading}</h1><p className="mt-2 text-slate-500">{description}</p></div>
         <CreateItemModalTrigger />
       </header>
-      <ItemList key={filter ?? "all"} items={items} isAdmin={profile.role === "admin"} initialAssignmentFilter={filter ?? "all"} />
+      <ItemList
+        key={filter ?? "all"}
+        items={items}
+        isAdmin={profile.role === "admin"}
+        initialAssignmentFilter={filter ?? "all"}
+        initialNewItemIds={initialNewItemIds}
+      />
     </div>
   );
 }

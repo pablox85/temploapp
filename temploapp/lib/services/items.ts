@@ -3,15 +3,23 @@ import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import type { ItemWithSelection } from "@/lib/types/database";
 
-export async function getUnreadItemsNotificationCount(itemsLastSeenAt: string): Promise<number> {
+export async function getUnreadItemsNotification(itemsLastSeenAt: string): Promise<{
+  count: number;
+  version: string | null;
+}> {
   const supabase = await createClient();
-  const { count, error } = await supabase
+  const { data, count, error } = await supabase
     .from("items")
-    .select("id", { count: "exact", head: true })
-    .gt("created_at", itemsLastSeenAt);
+    .select("created_at", { count: "exact" })
+    .gt("created_at", itemsLastSeenAt)
+    .order("created_at", { ascending: false })
+    .limit(1);
 
   if (error) throw new Error(`No se pudieron cargar las notificaciones: ${error.message}`);
-  return count ?? 0;
+  return {
+    count: count ?? 0,
+    version: data?.[0]?.created_at ?? null,
+  };
 }
 
 export async function getItems(userId: string, canViewAllAssignees: boolean): Promise<ItemWithSelection[]> {
