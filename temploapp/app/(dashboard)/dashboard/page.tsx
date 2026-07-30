@@ -16,13 +16,13 @@ export default async function DashboardPage() {
   const listTitle = profile.tenants?.items_list_title?.trim() || "Total Items";
 
   return (
-    <div className="mx-auto max-w-7xl">
-      <header className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
+    <div className="dashboard-page mx-auto max-w-7xl">
+      <header className="dashboard-page-header flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
         <div><p className="text-sm font-semibold text-teal-600">PANEL GENERAL</p><h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-950">Hola, {firstName}</h1><p className="mt-2 text-slate-500">Este es el estado actual de la lista compartida.</p></div>
         <Link href="/dashboard/items/new" className="button-primary"><PlusIcon className="size-4" />Nuevo ítem</Link>
       </header>
 
-      <section className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+      <section className="dashboard-stat-grid mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <StatCard href="/dashboard/items" label={listTitle} value={stats.items} icon={ListIcon} />
         <StatCard href="/dashboard/items?filter=available" label="Ítems disp" value={stats.availableItems} icon={ListIcon} tone="teal" />
         <StatCard href="/dashboard/my-items" label="Mi selección" value={stats.mine} icon={CheckIcon} tone="violet" />
@@ -42,7 +42,7 @@ export default async function DashboardPage() {
         ))}
       </section>
 
-      <section className="mt-8 grid gap-6 lg:grid-cols-[1.4fr_.8fr]">
+      <section className="dashboard-panel-grid mt-8 grid gap-6 lg:grid-cols-[1.4fr_.8fr]">
         <div className="overflow-hidden rounded-2xl bg-slate-950 p-7 text-white shadow-xl shadow-slate-900/10 sm:p-9">
           <p className="text-sm font-semibold text-teal-400">EMPIEZA A COLABORAR</p>
           <h2 className="mt-2 max-w-md text-2xl font-bold">Explora la lista y elige el ítem que necesitas.</h2>

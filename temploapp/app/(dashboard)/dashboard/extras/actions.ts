@@ -58,7 +58,7 @@ export async function createExtraListAction(
   }
   if (error) return { status: "error", message: getActionError(error) };
 
-  revalidatePath("/dashboard");
+  revalidatePath("/dashboard", "layout");
   revalidatePath("/dashboard/extras");
   return { status: "success", message: `Lista “${parsed.data.name}” creada.` };
 }
@@ -82,7 +82,7 @@ export async function deleteExtraListAction(listId: string): Promise<ActionState
     return { status: "error", message: "La lista no existe o no pertenece a tu tenant." };
   }
 
-  revalidatePath("/dashboard");
+  revalidatePath("/dashboard", "layout");
   revalidatePath("/dashboard/extras");
   return { status: "success", message: "Lista eliminada." };
 }

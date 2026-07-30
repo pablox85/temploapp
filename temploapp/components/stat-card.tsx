@@ -14,7 +14,7 @@ export function StatCard({ label, value, detail, icon: Icon, tone = "teal", href
     <div className="motion-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/3 hover:border-teal-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2">
       <div className="flex items-start justify-between">
         <div><p className="max-w-[11rem] truncate text-sm font-medium text-slate-500">{label}</p><p className="mt-2 text-3xl font-bold tracking-tight text-slate-900">{value}</p></div>
-        <span className={`grid size-11 place-items-center rounded-xl ${tones[tone]}`}><Icon className="size-5" /></span>
+        <span className={`dashboard-stat-icon grid size-11 place-items-center rounded-xl ${tones[tone]}`}><Icon className="size-5" /></span>
       </div>
       {detail && <p className="mt-3 text-xs text-slate-400">{detail}</p>}
     </div>

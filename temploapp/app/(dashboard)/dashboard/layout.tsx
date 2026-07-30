@@ -8,6 +8,7 @@ import { MobileDashboardMenu } from "@/components/mobile-dashboard-menu";
 import { ItemNotifications } from "@/components/item-notifications";
 import { ItemsRealtime } from "@/components/items-realtime";
 import { getUnreadItemsNotification } from "@/lib/services/items";
+import { getExtraLists } from "@/lib/services/extra-lists";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const profile = await requireProfile();
@@ -15,7 +16,15 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const displayName = tenantName
     ? `${profile.full_name} · ${tenantName}`
     : profile.full_name;
-  const unreadItems = await getUnreadItemsNotification(profile.items_last_seen_at);
+  const [unreadItems, extraLists] = await Promise.all([
+    getUnreadItemsNotification(profile.items_last_seen_at),
+    profile.role === "admin" ? getExtraLists() : Promise.resolve([]),
+  ]);
+  const dashboardExtraLists = extraLists.map(({ id, name, list_type }) => ({
+    id,
+    name,
+    listType: list_type,
+  }));
 
   return (
     <div className="dashboard-shell min-h-screen bg-slate-50 dark:bg-slate-950 lg:grid lg:grid-cols-[260px_1fr]">
@@ -27,12 +36,14 @@ export default async function DashboardLayout({ children }: { children: React.Re
           </div>
           <ThemeToggle />
         </div>
-        <div className="mt-5 overflow-x-auto pb-1 lg:mt-10 lg:overflow-visible"><DashboardNav isAdmin={profile.role === "admin"} /></div>
+        <div className="mt-5 min-h-0 overflow-x-auto pb-1 lg:mt-10 lg:flex-1 lg:overflow-x-hidden lg:overflow-y-auto">
+          <DashboardNav isAdmin={profile.role === "admin"} extraLists={dashboardExtraLists} />
+        </div>
         <div className="mt-auto hidden border-t border-slate-100 pt-5 lg:block dark:border-slate-800">
           <form action={signOutAction}><button className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white" aria-label="Salir"><LogOutIcon className="size-5" />Salir</button></form>
         </div>
       </aside>
-      <MobileDashboardMenu isAdmin={profile.role === "admin"} fullName={displayName}>
+      <MobileDashboardMenu isAdmin={profile.role === "admin"} fullName={displayName} extraLists={dashboardExtraLists}>
         <form action={signOutAction}><button className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white" aria-label="Salir"><LogOutIcon className="size-5" />Salir</button></form>
       </MobileDashboardMenu>
       <main className="min-w-0 p-5 sm:p-8 xl:p-10">{children}</main>

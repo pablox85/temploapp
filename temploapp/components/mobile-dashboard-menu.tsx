@@ -3,10 +3,24 @@
 import { useEffect, useState } from "react";
 import { Brand } from "@/components/brand";
 import { CloseIcon, MenuIcon } from "@/components/icons";
-import { DashboardNav, DashboardQuickLinks } from "@/components/dashboard-nav";
+import {
+  DashboardNav,
+  DashboardQuickLinks,
+  type DashboardExtraList,
+} from "@/components/dashboard-nav";
 import { ThemeToggle } from "@/components/theme-toggle";
 
-export function MobileDashboardMenu({ isAdmin, fullName, children }: { isAdmin: boolean; fullName: string; children: React.ReactNode }) {
+export function MobileDashboardMenu({
+  isAdmin,
+  fullName,
+  extraLists,
+  children,
+}: {
+  isAdmin: boolean;
+  fullName: string;
+  extraLists: DashboardExtraList[];
+  children: React.ReactNode;
+}) {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -27,11 +41,11 @@ export function MobileDashboardMenu({ isAdmin, fullName, children }: { isAdmin: 
       <div className="flex min-w-0 items-start gap-1">
         <DashboardQuickLinks isAdmin={isAdmin} />
         <div className="flex flex-col items-center gap-0.5">
-          <ThemeToggle />
+          <ThemeToggle navbar />
           <span className="text-[9px] font-medium leading-3 text-slate-500 dark:text-slate-400">Tema</span>
         </div>
         <div className="flex flex-col items-center gap-0.5">
-          <button type="button" onClick={() => setOpen(true)} className="grid size-9 place-items-center rounded-lg border border-slate-200 text-slate-600 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800" aria-label="Abrir menú" aria-expanded={open}>
+          <button type="button" onClick={() => setOpen(true)} className="mobile-nav-control size-8 min-[430px]:size-9" aria-label="Abrir menú" aria-expanded={open}>
             <MenuIcon className="size-5" />
           </button>
           <span className="text-[9px] font-medium leading-3 text-slate-500 dark:text-slate-400">Menú</span>
@@ -48,7 +62,7 @@ export function MobileDashboardMenu({ isAdmin, fullName, children }: { isAdmin: 
           </div>
           <button type="button" onClick={() => setOpen(false)} className="grid size-9 place-items-center rounded-lg text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800" aria-label="Cerrar menú"><CloseIcon className="size-5" /></button>
         </div>
-        <div className="mt-8"><DashboardNav isAdmin={isAdmin} mobile onNavigate={() => setOpen(false)} /></div>
+        <div className="mt-8"><DashboardNav isAdmin={isAdmin} extraLists={extraLists} mobile onNavigate={() => setOpen(false)} /></div>
         <div className="mt-auto border-t border-slate-100 pt-5 dark:border-slate-800">{children}</div>
       </aside>
     </div>
