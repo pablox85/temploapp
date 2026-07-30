@@ -3,11 +3,15 @@ import { CreateItemForm } from "@/components/create-item-form";
 import { CheckIcon, ListIcon, PlusIcon, SparklesIcon, UsersIcon } from "@/components/icons";
 import { StatCard } from "@/components/stat-card";
 import { requireProfile } from "@/lib/auth";
+import { getInventoryDashboardLists } from "@/lib/services/extra-lists";
 import { getDashboardStats } from "@/lib/services/items";
 
 export default async function DashboardPage() {
   const profile = await requireProfile();
-  const stats = await getDashboardStats(profile.id);
+  const [stats, inventories] = await Promise.all([
+    getDashboardStats(profile.id),
+    profile.role === "admin" ? getInventoryDashboardLists() : Promise.resolve([]),
+  ]);
   const firstName = profile.full_name.split(" ")[0];
   const listTitle = profile.tenants?.items_list_title?.trim() || "Total Items";
 
@@ -25,6 +29,17 @@ export default async function DashboardPage() {
         <StatCard href="/dashboard/items?filter=selected" label="Items selec..." value={stats.assignments} icon={UsersIcon} tone="amber" />
         <StatCard href={profile.role === "admin" ? "/dashboard/admin/users" : undefined} label="Usuarios" value={stats.users} icon={UsersIcon} tone="blue" />
         {profile.role === "admin" && <StatCard href="/dashboard/extras" label="Extras" value={stats.extras} detail="Listas adicionales" icon={SparklesIcon} tone="violet" />}
+        {inventories.map((inventory) => (
+          <StatCard
+            key={inventory.id}
+            href={`/dashboard/extras/${encodeURIComponent(inventory.name)}`}
+            label={inventory.name}
+            value={inventory.itemCount}
+            detail={inventory.itemCount === 1 ? "Producto en inventario" : "Productos en inventario"}
+            icon={ListIcon}
+            tone="blue"
+          />
+        ))}
       </section>
 
       <section className="mt-8 grid gap-6 lg:grid-cols-[1.4fr_.8fr]">

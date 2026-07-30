@@ -3,6 +3,10 @@ import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import type { ExtraList, ExtraListEntries } from "@/lib/types/database";
 
+export type InventoryDashboardList = Pick<ExtraList, "id" | "name"> & {
+  itemCount: number;
+};
+
 export async function getExtraLists(): Promise<ExtraList[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -12,6 +16,22 @@ export async function getExtraLists(): Promise<ExtraList[]> {
 
   if (error) throw new Error(`No se pudieron cargar las listas extra: ${error.message}`);
   return data ?? [];
+}
+
+export async function getInventoryDashboardLists(): Promise<InventoryDashboardList[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("extra_lists")
+    .select("id, name, extra_list_entries(count)")
+    .eq("list_type", "inventory")
+    .order("created_at", { ascending: false });
+
+  if (error) throw new Error(`No se pudieron cargar los inventarios: ${error.message}`);
+  return (data ?? []).map((list) => ({
+    id: list.id,
+    name: list.name,
+    itemCount: list.extra_list_entries[0]?.count ?? 0,
+  }));
 }
 
 export async function getExtraListByName(listName: string): Promise<ExtraList | null> {

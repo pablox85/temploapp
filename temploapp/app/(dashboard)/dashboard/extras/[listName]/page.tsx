@@ -54,7 +54,7 @@ export default async function ExtraListPage({
         );
 
   return (
-    <div className="mx-auto max-w-5xl">
+    <div className="extras-page-transition mx-auto max-w-5xl">
       <Link
         href="/dashboard/extras"
         className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 transition hover:text-teal-600 dark:text-slate-400 dark:hover:text-teal-300"

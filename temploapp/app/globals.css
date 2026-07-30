@@ -67,6 +67,15 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
+.extras-page-transition {
+  animation: extras-page-enter 380ms cubic-bezier(.22, 1, .36, 1) both;
+}
+
+@keyframes extras-page-enter {
+  from { opacity: 0; transform: translateX(12px) scale(.995); }
+  to { opacity: 1; transform: translateX(0) scale(1); }
+}
+
 .motion-card {
   animation: soft-enter 360ms ease-out both;
   transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
@@ -96,6 +105,7 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .dashboard-shell { transition: none; }
   .page-transition,
+  .extras-page-transition,
   .motion-card,
   .login-panel-left,
   .login-panel-right,

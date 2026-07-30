@@ -58,6 +58,7 @@ export async function createExtraListAction(
   }
   if (error) return { status: "error", message: getActionError(error) };
 
+  revalidatePath("/dashboard");
   revalidatePath("/dashboard/extras");
   return { status: "success", message: `Lista “${parsed.data.name}” creada.` };
 }
