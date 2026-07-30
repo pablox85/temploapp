@@ -6,22 +6,25 @@ import { ArrowLeftIcon } from "@/components/icons";
 
 const STORAGE_KEY = "temploapp-floating-back-button-position";
 const HISTORY_STORAGE_KEY = "temploapp-dashboard-history";
-const BUTTON_WIDTH = 104;
 const BUTTON_HEIGHT = 48;
 const VIEWPORT_MARGIN = 12;
 
 type Position = { x: number; y: number };
 
+function buttonWidth(): number {
+  return window.innerWidth < 640 ? 48 : 104;
+}
+
 function clampPosition(position: Position): Position {
   return {
-    x: Math.min(Math.max(VIEWPORT_MARGIN, position.x), window.innerWidth - BUTTON_WIDTH - VIEWPORT_MARGIN),
+    x: Math.min(Math.max(VIEWPORT_MARGIN, position.x), window.innerWidth - buttonWidth() - VIEWPORT_MARGIN),
     y: Math.min(Math.max(VIEWPORT_MARGIN, position.y), window.innerHeight - BUTTON_HEIGHT - VIEWPORT_MARGIN),
   };
 }
 
 function defaultPosition(): Position {
   return {
-    x: Math.max(VIEWPORT_MARGIN, window.innerWidth - BUTTON_WIDTH - 20),
+    x: Math.max(VIEWPORT_MARGIN, window.innerWidth - buttonWidth() - 20),
     y: Math.max(VIEWPORT_MARGIN, window.innerHeight - BUTTON_HEIGHT - 20),
   };
 }
@@ -45,6 +48,7 @@ export function FloatingBackButton() {
   const pathname = usePathname();
   const [position, setPosition] = useState<Position | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [overlayOpen, setOverlayOpen] = useState(false);
   const pointerStart = useRef<Position | null>(null);
   const dragOrigin = useRef<Position | null>(null);
   const didDrag = useRef(false);
@@ -92,6 +96,24 @@ export function FloatingBackButton() {
 
     window.addEventListener("resize", keepInViewport);
     return () => window.removeEventListener("resize", keepInViewport);
+  }, []);
+
+  useEffect(() => {
+    function syncOverlayState() {
+      const dialogs = document.querySelectorAll<HTMLElement>('[role="dialog"][aria-modal="true"]');
+      setOverlayOpen([...dialogs].some((dialog) => !dialog.closest('[aria-hidden="true"], [inert]')));
+    }
+
+    const observer = new MutationObserver(syncOverlayState);
+    observer.observe(document.body, {
+      attributes: true,
+      attributeFilter: ["aria-hidden", "inert"],
+      childList: true,
+      subtree: true,
+    });
+    syncOverlayState();
+
+    return () => observer.disconnect();
   }, []);
 
   function handlePointerDown(event: React.PointerEvent<HTMLButtonElement>) {
@@ -146,7 +168,7 @@ export function FloatingBackButton() {
     router.push("/dashboard");
   }
 
-  if (!pathname.startsWith("/dashboard") || !position) return null;
+  if (!pathname.startsWith("/dashboard") || pathname === "/dashboard" || overlayOpen || !position) return null;
 
   return (
     <button
@@ -156,13 +178,14 @@ export function FloatingBackButton() {
       onPointerUp={finishDragging}
       onPointerCancel={finishDragging}
       onClick={handleClick}
-      className={`fixed z-50 inline-flex h-12 w-[104px] touch-none items-center justify-center gap-2 rounded-full border border-teal-500/30 bg-teal-600 px-4 text-sm font-semibold text-white shadow-lg shadow-teal-950/25 transition hover:bg-teal-700 focus-visible:ring-4 focus-visible:ring-teal-500/30 focus-visible:outline-none ${isDragging ? "scale-105 cursor-grabbing" : "cursor-grab"}`}
+      className={`fixed z-50 inline-flex size-12 touch-none items-center justify-center gap-2 rounded-full border border-teal-500/30 bg-teal-600 p-0 text-sm font-semibold text-white shadow-lg shadow-teal-950/25 transition hover:bg-teal-700 focus-visible:ring-4 focus-visible:ring-teal-500/30 focus-visible:outline-none sm:h-12 sm:w-[104px] sm:px-4 ${isDragging ? "scale-105 cursor-grabbing" : "cursor-grab"}`}
       style={{ left: position.x, top: position.y }}
       aria-label="Volver dentro de TemploAPP. Arrastra para mover el botón."
       title="Volver al movimiento anterior · arrastra para mover"
+      data-floating-back-button
     >
-      <ArrowLeftIcon className="size-4" />
-      Volver
+      <ArrowLeftIcon className="size-5 sm:size-4" />
+      <span className="hidden sm:inline">Volver</span>
     </button>
   );
 }

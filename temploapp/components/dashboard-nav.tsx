@@ -14,7 +14,6 @@ import {
   SparklesIcon,
   UsersIcon,
 } from "@/components/icons";
-import { CreateItemModalTrigger } from "@/components/create-item-modal";
 import type { ExtraListType } from "@/lib/types/database";
 
 export type DashboardExtraList = {
@@ -48,7 +47,7 @@ const links = [
 ];
 
 function getLinks(isAdmin: boolean) {
-  return isAdmin ? [...links, { href: "/dashboard/admin", label: "Admin -> usuario / items", icon: ShieldIcon, exact: true }, { href: "/dashboard/admin/users", label: "Usuarios", icon: UsersIcon, exact: true }] : links;
+  return isAdmin ? [...links, { href: "/dashboard/admin", label: "Administracion", icon: ShieldIcon, exact: true }, { href: "/dashboard/admin/users", label: "Usuarios", icon: UsersIcon, exact: true }] : links;
 }
 
 export function DashboardNav({
@@ -69,9 +68,6 @@ export function DashboardNav({
     <nav aria-label="Navegación principal" className={mobile ? "space-y-1" : "flex min-w-max gap-1 lg:block lg:min-w-0 lg:space-y-1"}>
       {allLinks.map(({ href, label, icon: Icon, exact }) => {
         const active = exact ? pathname === href : pathname.startsWith(href);
-        if (href === "/dashboard/items/new" && pathname !== "/dashboard" && pathname !== "/dashboard/items/new") {
-          return <CreateItemModalTrigger key={href} label={label} className={`nav-link ${mobile ? "w-full" : ""}`} onOpen={onNavigate} />;
-        }
         return (
           <Link key={href} href={href} onClick={onNavigate} className={`nav-link ${mobile ? "w-full" : ""} ${active ? "nav-link-active" : ""}`}>
             <Icon className="size-5" />{label}
@@ -119,37 +115,34 @@ export function DashboardQuickLinks({ isAdmin }: { isAdmin: boolean }) {
   const pathname = usePathname();
   const quickLinks = [
     { href: "/dashboard", label: "Panel", icon: GridIcon, exact: true },
-    ...getLinks(isAdmin),
+    links[0],
+    links[2],
     ...(isAdmin
-      ? [{ href: "/dashboard/extras", label: "Administrar listas", icon: SparklesIcon }]
+      ? [{ href: "/dashboard/extras", label: "Administrar listas", icon: SparklesIcon, exact: true }]
       : []),
   ];
   return (
-    <nav aria-label="Accesos directos" className="flex items-start gap-0.5 min-[430px]:gap-1">
-      {quickLinks.filter(({ href }) => href !== "/dashboard/items/new").map(({ href, label, icon: Icon, exact }) => {
+    <nav aria-label="Accesos directos" className="flex items-start gap-1">
+      {quickLinks.map(({ href, label, icon: Icon, exact }) => {
         const active = exact ? pathname === href : pathname.startsWith(href);
         const shortLabel = href === "/dashboard"
           ? "Panel"
           : href === "/dashboard/items"
             ? "Lista"
-            : href === "/dashboard/my-items"
-              ? "Mis ítems"
-              : href === "/dashboard/admin"
-                ? "Admin"
-                : href === "/dashboard/admin/users"
-                  ? "Usuarios"
-                  : "Extras";
+            : href === "/dashboard/extras"
+              ? "Listas"
+              : "Mis ítems";
         return (
-          <div key={href} className="flex min-w-8 flex-col items-center gap-0.5 min-[430px]:min-w-9">
+          <div key={href} className="flex min-w-11 flex-col items-center gap-0.5">
             <Link
               href={href}
-              className={`mobile-nav-control size-8 min-[430px]:size-9 ${active ? "mobile-nav-control-active" : ""}`}
+              className={`mobile-nav-control size-11 ${active ? "mobile-nav-control-active" : ""}`}
               aria-label={label}
               title={label}
             >
               <Icon className="size-5" />
             </Link>
-            <span className={`whitespace-nowrap text-[9px] font-medium leading-3 ${active ? "text-teal-700 dark:text-teal-300" : "text-slate-500 dark:text-slate-400"}`} aria-hidden="true">{shortLabel}</span>
+            <span className={`whitespace-nowrap text-[10px] font-medium leading-3 ${active ? "text-teal-700 dark:text-teal-300" : "text-slate-500 dark:text-slate-400"}`} aria-hidden="true">{shortLabel}</span>
           </div>
         );
       })}

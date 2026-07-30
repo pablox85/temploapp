@@ -60,6 +60,12 @@ export function ItemList({ items, onlySelected = false, isAdmin = false, initial
       || item.assigned_profile?.id === ownerId;
     return matchesSearch && matchesSelection && matchesAction && matchesOwner;
   }), [assignmentFilter, items, onlySelected, ownerId, query]);
+  const hasOwnSelection = items.some((item) => item.is_selected);
+  const emptyMessage = items.length === 0
+    ? "La lista todavía está vacía."
+    : onlySelected && !hasOwnSelection
+      ? "Todavía no seleccionaste ningún ítem."
+      : "No hay ítems que coincidan con esta búsqueda o los filtros aplicados.";
   const columns = "md:grid-cols-[minmax(0,1fr)_140px_minmax(170px,220px)_150px_88px]";
   const allItemsMarked = items.length > 0 && items.every((item) => markedIds.has(item.id));
   const purchasableMarkedItems = items
@@ -138,7 +144,7 @@ export function ItemList({ items, onlySelected = false, isAdmin = false, initial
           <span>Ítem</span><span className="text-center">Selecciones</span><span className="text-center">Seleccionado por</span><span className="text-center">Acción</span><span className="text-center">Marcar</span>
         </div>
         {filtered.length === 0 ? (
-          <p className="px-6 py-14 text-center text-sm text-slate-500">No hay ítems que coincidan con esta búsqueda.</p>
+          <p className="px-6 py-14 text-center text-sm text-slate-500" aria-live="polite">{emptyMessage}</p>
         ) : filtered.map((item) => {
           const isMarked = markedIds.has(item.id);
           const isNew = newItemIds.has(item.id);

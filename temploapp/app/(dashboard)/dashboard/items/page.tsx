@@ -1,6 +1,7 @@
+import Link from "next/link";
 import { ItemList } from "@/components/item-list";
-import { CreateItemModalTrigger } from "@/components/create-item-modal";
 import { CollaborativeListTitle } from "@/components/collaborative-list-title";
+import { PlusIcon } from "@/components/icons";
 import { requireProfile } from "@/lib/auth";
 import { getItems } from "@/lib/services/items";
 
@@ -38,7 +39,7 @@ export default async function ItemsPage({ searchParams }: { searchParams: Promis
             <CollaborativeListTitle key={listTitle} initialTitle={listTitle} isAdmin={profile.role === "admin"} />
           </div>
         </div>
-        <CreateItemModalTrigger />
+        <Link href="/dashboard/items/new" className="button-primary"><PlusIcon className="size-4" />Agregar ítem</Link>
       </header>
       <ItemList
         key={filter ?? "all"}
