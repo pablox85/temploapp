@@ -13,12 +13,13 @@ export default async function DashboardPage() {
     profile.role === "admin" ? getInventoryDashboardLists() : Promise.resolve([]),
   ]);
   const firstName = profile.full_name.split(" ")[0];
+  const tenantName = profile.tenants?.name?.trim() || "TemploAPP";
   const listTitle = profile.tenants?.items_list_title?.trim() || "Total Items";
 
   return (
     <div className="dashboard-page mx-auto max-w-7xl">
       <header className="dashboard-page-header flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
-        <div><p className="text-sm font-semibold text-teal-600">PANEL GENERAL</p><h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-950">Hola, {firstName}</h1><p className="mt-2 text-slate-500">Este es el estado actual de la lista compartida.</p></div>
+        <div><p className="text-sm font-semibold text-teal-600">PANEL GENERAL</p><h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-950">Hola, {firstName}</h1><p className="mt-2 text-slate-500">{tenantName}</p></div>
         <Link href="/dashboard/items/new" className="button-primary"><PlusIcon className="size-4" />Nuevo ítem</Link>
       </header>
 
