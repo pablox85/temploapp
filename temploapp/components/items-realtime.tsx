@@ -9,7 +9,7 @@ type ItemsRealtimeProps = {
   tenantId: string;
 };
 
-type RealtimeTable = "items" | "user_items" | "profiles";
+type RealtimeTable = "items" | "user_items" | "profiles" | "tenants";
 
 export function ItemsRealtime({ tenantId }: ItemsRealtimeProps) {
   const router = useRouter();
@@ -157,6 +157,18 @@ export function ItemsRealtime({ tenantId }: ItemsRealtimeProps) {
           },
           (payload) => {
             scheduleRefresh("profiles", payload.eventType, payload);
+          },
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "UPDATE",
+            schema: "public",
+            table: "tenants",
+            filter: `id=eq.${tenantId}`,
+          },
+          (payload) => {
+            scheduleRefresh("tenants", payload.eventType, payload);
           },
         )
         .subscribe((status, error) => {

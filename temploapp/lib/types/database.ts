@@ -13,9 +13,9 @@ export type Database = {
   public: {
     Tables: {
       tenants: {
-        Row: { id: string; name: string; created_at: string };
-        Insert: { id: string; name: string; created_at?: string };
-        Update: { name?: string };
+        Row: { id: string; name: string; items_list_title: string | null; created_at: string };
+        Insert: { id: string; name: string; items_list_title?: string | null; created_at?: string };
+        Update: { name?: string; items_list_title?: string | null };
         Relationships: [];
       };
       profiles: {
@@ -264,7 +264,7 @@ export type ExtraListEntries = {
 };
 export type CurrentProfile = Profile & {
   tenant_id: string;
-  tenants: Pick<Tenant, "name"> | null;
+  tenants: Pick<Tenant, "name" | "items_list_title"> | null;
 };
 export type Item = Omit<Database["public"]["Tables"]["items"]["Row"], "tenant_id">;
 export type UserItem = Omit<Database["public"]["Tables"]["user_items"]["Row"], "tenant_id">;

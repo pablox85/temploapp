@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { extraListSchema, tenantIdSchema } from "@/lib/validation";
+import { collaborativeListTitleSchema, extraListSchema, tenantIdSchema } from "@/lib/validation";
 
 describe("tenantIdSchema", () => {
   it("accepts the seeded PostgreSQL tenant UUID", () => {
@@ -32,5 +32,19 @@ describe("extraListSchema", () => {
     expect(
       extraListSchema.safeParse({ name: "Otra lista", type: "calendar" }).success,
     ).toBe(false);
+  });
+});
+
+describe("collaborativeListTitleSchema", () => {
+  it("cleans a shared title", () => {
+    expect(collaborativeListTitleSchema.parse("  Compras   del mes  ")).toBe("Compras del mes");
+  });
+
+  it("accepts an empty title to restore the default label", () => {
+    expect(collaborativeListTitleSchema.parse("   ")).toBe("");
+  });
+
+  it("rejects titles longer than 80 characters", () => {
+    expect(collaborativeListTitleSchema.safeParse("a".repeat(81)).success).toBe(false);
   });
 });

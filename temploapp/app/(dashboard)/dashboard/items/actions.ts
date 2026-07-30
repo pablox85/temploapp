@@ -3,8 +3,14 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getActionError, type ActionState } from "@/lib/action-state";
-import { requireUser } from "@/lib/auth";
-import { idSchema, itemNameSchema } from "@/lib/validation";
+import { requireProfile, requireUser } from "@/lib/auth";
+import { collaborativeListTitleSchema, idSchema, itemNameSchema } from "@/lib/validation";
+
+export type CollaborativeListTitleResult = {
+  status: "success" | "error";
+  message: string;
+  title?: string | null;
+};
 
 function refreshItemViews() {
   revalidatePath("/dashboard");
@@ -45,6 +51,38 @@ export async function markItemsNotificationsSeenAction(): Promise<ActionState> {
   if (error) return { status: "error", message: getActionError(error) };
   revalidatePath("/dashboard", "layout");
   return { status: "success", message: "Notificaciones actualizadas." };
+}
+
+export async function updateCollaborativeListTitleAction(
+  title: string,
+): Promise<CollaborativeListTitleResult> {
+  const profile = await requireProfile();
+  if (profile.role !== "admin") {
+    return { status: "error", message: "Solo un administrador puede cambiar el título." };
+  }
+
+  const parsed = collaborativeListTitleSchema.safeParse(title);
+  if (!parsed.success) {
+    return { status: "error", message: parsed.error.issues[0].message };
+  }
+
+  const nextTitle = parsed.data || null;
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("tenants")
+    .update({ items_list_title: nextTitle })
+    .eq("id", profile.tenant_id)
+    .select("items_list_title")
+    .single();
+
+  if (error) return { status: "error", message: getActionError(error) };
+
+  revalidatePath("/dashboard", "layout");
+  return {
+    status: "success",
+    message: nextTitle ? "Título guardado." : "Título restablecido.",
+    title: data.items_list_title,
+  };
 }
 
 export async function selectItemAction(itemId: string): Promise<ActionState> {

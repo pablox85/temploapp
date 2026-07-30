@@ -1,5 +1,6 @@
 import { ItemList } from "@/components/item-list";
 import { CreateItemModalTrigger } from "@/components/create-item-modal";
+import { CollaborativeListTitle } from "@/components/collaborative-list-title";
 import { requireProfile } from "@/lib/auth";
 import { getItems } from "@/lib/services/items";
 
@@ -23,12 +24,20 @@ export default async function ItemsPage({ searchParams }: { searchParams: Promis
     ? "Estos ítems todavía no fueron seleccionados."
     : filter === "selected"
       ? "Estos ítems ya fueron seleccionados por usuarios del templo."
-      : "Selecciona un ítem disponible para tu lista.";
+      : "Selecciona los items.";
+  const listTitle = profile.tenants?.items_list_title?.trim() ?? "";
 
   return (
     <div className="mx-auto max-w-7xl">
       <header className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-        <div><p className="text-sm font-semibold text-teal-600">LISTA COLABORATIVA</p><h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-950">{heading}</h1><p className="mt-2 text-slate-500">{description}</p></div>
+        <div className="min-w-0">
+          <p className="text-sm font-semibold text-teal-600">LISTA COLABORATIVA</p>
+          <h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-950">{heading}</h1>
+          <p className="mt-2 text-slate-500">{description}</p>
+          <div className="mt-5">
+            <CollaborativeListTitle key={listTitle} initialTitle={listTitle} isAdmin={profile.role === "admin"} />
+          </div>
+        </div>
         <CreateItemModalTrigger />
       </header>
       <ItemList

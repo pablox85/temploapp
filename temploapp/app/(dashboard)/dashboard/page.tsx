@@ -9,6 +9,7 @@ export default async function DashboardPage() {
   const profile = await requireProfile();
   const stats = await getDashboardStats(profile.id);
   const firstName = profile.full_name.split(" ")[0];
+  const listTitle = profile.tenants?.items_list_title?.trim() || "Total Items";
 
   return (
     <div className="mx-auto max-w-7xl">
@@ -18,7 +19,7 @@ export default async function DashboardPage() {
       </header>
 
       <section className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-        <StatCard href="/dashboard/items" label="Total Items" value={stats.items} icon={ListIcon} />
+        <StatCard href="/dashboard/items" label={listTitle} value={stats.items} icon={ListIcon} />
         <StatCard href="/dashboard/items?filter=available" label="Ítems disp" value={stats.availableItems} icon={ListIcon} tone="teal" />
         <StatCard href="/dashboard/my-items" label="Mi selección" value={stats.mine} icon={CheckIcon} tone="violet" />
         <StatCard href="/dashboard/items?filter=selected" label="Items selec..." value={stats.assignments} icon={UsersIcon} tone="amber" />

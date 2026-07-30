@@ -8,6 +8,12 @@ export const itemNameSchema = z
   .max(160, "El nombre no puede superar los 160 caracteres.")
   .transform((value) => value.replace(/\s+/g, " "));
 
+export const collaborativeListTitleSchema = z
+  .string()
+  .trim()
+  .max(80, "El título no puede superar los 80 caracteres.")
+  .transform((value) => value.replace(/\s+/g, " "));
+
 export const idSchema = z.string().uuid("Identificador inválido.");
 
 // PostgreSQL accepts canonical UUID values regardless of RFC version/variant.
