@@ -1,17 +1,27 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 import {
   createInventoryEntryAction,
   deleteExtraListEntryAction,
   updateInventoryQuantityAction,
 } from "@/app/(dashboard)/dashboard/extras/actions";
 import { ActionMessage } from "@/components/action-message";
-import { PlusIcon, TrashIcon } from "@/components/icons";
+import {
+  PlusIcon,
+  SortAscendingIcon,
+  SortDescendingIcon,
+  TrashIcon,
+} from "@/components/icons";
 import { SubmitButton } from "@/components/submit-button";
 import { useExtraEntryMutation } from "@/components/use-extra-entry-mutation";
 import { initialActionState } from "@/lib/action-state";
 import type { InventoryListEntry } from "@/lib/types/database";
+
+const inventoryNameCollator = new Intl.Collator("es", {
+  numeric: true,
+  sensitivity: "base",
+});
 
 export function ExtraInventoryList({
   listId,
@@ -25,8 +35,16 @@ export function ExtraInventoryList({
   const formRef = useRef<HTMLFormElement>(null);
   const createAction = createInventoryEntryAction.bind(null, listId, listName);
   const [createState, formAction] = useActionState(createAction, initialActionState);
+  const [sortDirection, setSortDirection] = useState<"ascending" | "descending">("ascending");
   const mutation = useExtraEntryMutation();
   const totalUnits = entries.reduce((total, entry) => total + entry.quantity, 0);
+  const sortedEntries = useMemo(() => {
+    const direction = sortDirection === "ascending" ? 1 : -1;
+    return [...entries].sort((left, right) => {
+      const byName = inventoryNameCollator.compare(left.title, right.title);
+      return byName === 0 ? left.id.localeCompare(right.id) : byName * direction;
+    });
+  }, [entries, sortDirection]);
 
   useEffect(() => {
     if (createState.status === "success") formRef.current?.reset();
@@ -53,9 +71,21 @@ export function ExtraInventoryList({
             <PlusIcon className="size-4" />Agregar
           </SubmitButton>
         </form>
-        <div className="flex gap-4 text-sm text-slate-500 dark:text-slate-400 lg:justify-end">
+        <div className="flex flex-wrap items-center gap-3 text-sm text-slate-500 dark:text-slate-400 lg:justify-end">
           <span><strong className="text-slate-900 dark:text-white">{entries.length}</strong> productos</span>
           <span><strong className="text-slate-900 dark:text-white">{totalUnits}</strong> unidades</span>
+          <button
+            type="button"
+            onClick={() => setSortDirection((current) => current === "ascending" ? "descending" : "ascending")}
+            className="button-secondary min-h-9 gap-1.5 px-3 py-2"
+            aria-label={`Ordenado por nombre ${sortDirection === "ascending" ? "ascendente" : "descendente"}. Cambiar a orden ${sortDirection === "ascending" ? "descendente" : "ascendente"}.`}
+            title={sortDirection === "ascending" ? "Cambiar a Z–A" : "Cambiar a A–Z"}
+          >
+            {sortDirection === "ascending"
+              ? <SortAscendingIcon className="size-4" />
+              : <SortDescendingIcon className="size-4" />}
+            <span>{sortDirection === "ascending" ? "A–Z" : "Z–A"}</span>
+          </button>
         </div>
         <div className="space-y-2 sm:col-span-full">
           <ActionMessage state={createState} />
@@ -72,7 +102,7 @@ export function ExtraInventoryList({
         </div>
       ) : (
         <div className="divide-y divide-slate-100 dark:divide-slate-800">
-          {entries.map((entry) => {
+          {sortedEntries.map((entry) => {
             const pending = mutation.pendingKey === entry.id;
             return (
               <div key={`${entry.id}-${entry.quantity}`} className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-4 px-5 py-4 sm:px-6">
