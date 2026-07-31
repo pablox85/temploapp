@@ -51,6 +51,29 @@ export const adminUserSchema = z
     message: "Las contraseñas no coinciden.",
   });
 
+export const superAdminTenantSchema = z
+  .object({
+    tenantName: z
+      .string()
+      .trim()
+      .min(1, "Escribe el nombre del templo.")
+      .max(120, "El nombre del templo no puede superar los 120 caracteres.")
+      .transform((value) => value.replace(/\s+/g, " ")),
+    adminName: z
+      .string()
+      .trim()
+      .min(1, "Escribe el nombre del administrador.")
+      .max(120, "El nombre no puede superar los 120 caracteres.")
+      .transform((value) => value.replace(/\s+/g, " ")),
+    email: z.email("Escribe un email válido."),
+    password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres."),
+    confirmPassword: z.string(),
+  })
+  .refine((value) => value.password === value.confirmPassword, {
+    path: ["confirmPassword"],
+    message: "Las contraseñas no coinciden.",
+  });
+
 export const profileRoleChangeSchema = z.object({
   profileId: idSchema,
   role: z.enum(["user", "admin"], { message: "El rol seleccionado no es válido." }),

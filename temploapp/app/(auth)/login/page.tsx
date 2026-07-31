@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Brand } from "@/components/brand";
 import { LoginForm } from "@/components/login-form";
 import { CheckIcon, ShieldIcon, UsersIcon } from "@/components/icons";
@@ -36,6 +37,14 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
             <LoginForm redirectTo={params.redirectTo ?? "/dashboard"} />
           </div>
           <p className="mt-6 text-center text-sm text-slate-500">Las cuentas son gestionadas por el administrador del espacio.</p>
+          <div className="mt-5 text-center">
+            <Link
+              href="/superadmin/login"
+              className="inline-flex rounded-md px-2 py-1 text-[11px] text-slate-600 transition hover:text-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400/60"
+            >
+              Acceso administrativo
+            </Link>
+          </div>
         </div>
       </section>
     </main>

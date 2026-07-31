@@ -236,6 +236,14 @@ export type Database = {
       current_tenant_id: { Args: Record<PropertyKey, never>; Returns: string };
       is_admin: { Args: Record<PropertyKey, never>; Returns: boolean };
       is_super_admin: { Args: Record<PropertyKey, never>; Returns: boolean };
+      create_tenant_with_admin: {
+        Args: {
+          tenant_name: string;
+          target_admin_user_id: string;
+          admin_full_name: string;
+        };
+        Returns: { tenant_id: string; name: string; admin_user_id: string }[];
+      };
       normalize_item_name: { Args: { value: string }; Returns: string };
       set_items_purchase_state: {
         Args: { target_item_ids: string[]; purchased: boolean };

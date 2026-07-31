@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { collaborativeListTitleSchema, extraListSchema, tenantIdSchema } from "@/lib/validation";
+import { collaborativeListTitleSchema, extraListSchema, superAdminTenantSchema, tenantIdSchema } from "@/lib/validation";
 
 describe("tenantIdSchema", () => {
   it("accepts the seeded PostgreSQL tenant UUID", () => {
@@ -46,5 +46,37 @@ describe("collaborativeListTitleSchema", () => {
 
   it("rejects titles longer than 80 characters", () => {
     expect(collaborativeListTitleSchema.safeParse("a".repeat(81)).success).toBe(false);
+  });
+});
+
+describe("superAdminTenantSchema", () => {
+  const validInput = {
+    tenantName: "Templo Norte",
+    adminName: "Ana Pérez",
+    email: "ana@example.com",
+    password: "secreto123",
+    confirmPassword: "secreto123",
+  };
+
+  it("normalizes names and accepts a valid tenant provision", () => {
+    expect(superAdminTenantSchema.parse({
+      ...validInput,
+      tenantName: "  Templo   Norte ",
+      adminName: " Ana   Pérez ",
+    })).toMatchObject({ tenantName: "Templo Norte", adminName: "Ana Pérez" });
+  });
+
+  it("rejects mismatched passwords", () => {
+    expect(superAdminTenantSchema.safeParse({
+      ...validInput,
+      confirmPassword: "otra-clave",
+    }).success).toBe(false);
+  });
+
+  it("rejects an invalid email", () => {
+    expect(superAdminTenantSchema.safeParse({
+      ...validInput,
+      email: "correo-invalido",
+    }).success).toBe(false);
   });
 });
