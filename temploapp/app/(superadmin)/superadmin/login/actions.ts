@@ -45,6 +45,6 @@ export async function superAdminLoginAction(
 
 export async function superAdminSignOutAction() {
   const supabase = await createClient();
-  await supabase.auth.signOut();
-  redirect("/superadmin/login");
+  await supabase.auth.signOut({ scope: "local" });
+  redirect("/login");
 }

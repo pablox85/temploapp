@@ -32,8 +32,8 @@ export default async function NewTenantPage() {
               SuperAdmin
             </span>
             <h1 className="mt-5 text-3xl font-bold tracking-tight text-white sm:text-4xl">Crear un nuevo templo</h1>
-            <p className="mt-4 max-w-md text-base leading-7 text-slate-400">Configura el espacio de trabajo y deja listo el acceso de su administrador inicial.</p>
-            <p className="mt-8 max-w-md rounded-xl border border-white/10 bg-white/4 px-4 py-3 text-sm leading-6 text-slate-400">El administrador se crea con acceso confirmado y queda vinculado únicamente al nuevo templo.</p>
+            <p className="mt-4 max-w-md text-base leading-7 text-slate-400">Configura el espacio de trabajo y deja listo el acceso de su administrador.</p>
+            <p className="mt-8 max-w-md rounded-xl border border-white/10 bg-white/4 px-4 py-3 text-sm leading-6 text-slate-400">EL administrador se crea con acceso confirmado y queda viculado a su lugar de trabajo.</p>
           </section>
 
           <section className="page-transition rounded-2xl border border-slate-800 bg-slate-900/80 p-5 shadow-2xl shadow-black/20 backdrop-blur sm:p-8">
