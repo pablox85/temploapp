@@ -12,6 +12,12 @@ export type ExtraListType = "checklist" | "inventory" | "notes";
 export type Database = {
   public: {
     Tables: {
+      super_admins: {
+        Row: { user_id: string; created_at: string };
+        Insert: { user_id: string; created_at?: string };
+        Update: never;
+        Relationships: [];
+      };
       tenants: {
         Row: { id: string; name: string; items_list_title: string | null; created_at: string };
         Insert: { id: string; name: string; items_list_title?: string | null; created_at?: string };
@@ -229,6 +235,7 @@ export type Database = {
       };
       current_tenant_id: { Args: Record<PropertyKey, never>; Returns: string };
       is_admin: { Args: Record<PropertyKey, never>; Returns: boolean };
+      is_super_admin: { Args: Record<PropertyKey, never>; Returns: boolean };
       normalize_item_name: { Args: { value: string }; Returns: string };
       set_items_purchase_state: {
         Args: { target_item_ids: string[]; purchased: boolean };
