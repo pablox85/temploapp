@@ -63,11 +63,14 @@ npm run dev
 NEXT_PUBLIC_SUPABASE_URL=https://TU_PROYECTO.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=TU_CLAVE_PUBLICA
 SUPABASE_SERVICE_ROLE_KEY=TU_CLAVE_PRIVADA_SOLO_SERVIDOR
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
 NEXT_PUBLIC_USE_DEMO_DATA=false
 NEXT_PUBLIC_CLARITY_PROJECT_ID=TU_ID_DE_PROYECTO_CLARITY
 ```
 
 La clave `SUPABASE_SERVICE_ROLE_KEY` es exclusivamente para operaciones server-side y nunca debe exponerse en el navegador.
+
+`NEXT_PUBLIC_SITE_URL` es la URL pública de la aplicación. Se usa exclusivamente para generar enlaces manuales de recuperación de contraseña. En producción debe ser, por ejemplo, `https://tu-dominio.com`.
 
 `NEXT_PUBLIC_CLARITY_PROJECT_ID` es opcional. Al configurarlo, Clarity se inicializa únicamente en el navegador; obtén el valor en **Microsoft Clarity → Settings → Overview**. Si no se define, no se carga ningún script de Clarity.
 
@@ -112,6 +115,19 @@ npm run build
 3. Ejecuta las migraciones en Supabase.
 4. Configura la URL de producción en **Supabase Auth → URL Configuration**.
 5. Despliega.
+
+### Recuperación manual de contraseña
+
+Un SuperAdmin puede generar un enlace temporal desde su panel global. El enlace no se guarda en la aplicación ni se envía por email: el SuperAdmin debe compartirlo de forma segura con la persona correspondiente.
+
+En **Supabase → Authentication → URL Configuration → Redirect URLs**, agrega al menos:
+
+```text
+http://localhost:3000/reset-password
+https://tu-dominio.com/reset-password
+```
+
+El usuario abre el enlace, define una nueva contraseña y vuelve automáticamente al login. El enlace se considera sensible y debe tratarse como una credencial temporal.
 
 ## Licencia
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { collaborativeListTitleSchema, extraListSchema, superAdminTenantSchema, tenantIdSchema } from "@/lib/validation";
+import { collaborativeListTitleSchema, extraListSchema, passwordRecoveryRequestSchema, passwordResetSchema, superAdminTenantSchema, tenantIdSchema } from "@/lib/validation";
 
 describe("tenantIdSchema", () => {
   it("accepts the seeded PostgreSQL tenant UUID", () => {
@@ -78,5 +78,31 @@ describe("superAdminTenantSchema", () => {
       ...validInput,
       email: "correo-invalido",
     }).success).toBe(false);
+  });
+});
+
+describe("passwordResetSchema", () => {
+  it("accepts a password that follows the existing minimum length rule", () => {
+    expect(passwordResetSchema.safeParse({
+      password: "nueva-clave",
+      confirmPassword: "nueva-clave",
+    }).success).toBe(true);
+  });
+
+  it("rejects mismatched passwords", () => {
+    expect(passwordResetSchema.safeParse({
+      password: "nueva-clave",
+      confirmPassword: "otra-clave",
+    }).success).toBe(false);
+  });
+});
+
+describe("passwordRecoveryRequestSchema", () => {
+  it("accepts a valid user email", () => {
+    expect(passwordRecoveryRequestSchema.safeParse({ email: "persona@example.com" }).success).toBe(true);
+  });
+
+  it("rejects an invalid email", () => {
+    expect(passwordRecoveryRequestSchema.safeParse({ email: "persona" }).success).toBe(false);
   });
 });

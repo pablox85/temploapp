@@ -38,6 +38,20 @@ export const loginSchema = z.object({
   password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres."),
 });
 
+export const passwordResetSchema = z
+  .object({
+    password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres."),
+    confirmPassword: z.string(),
+  })
+  .refine((value) => value.password === value.confirmPassword, {
+    path: ["confirmPassword"],
+    message: "Las contraseñas no coinciden.",
+  });
+
+export const passwordRecoveryRequestSchema = z.object({
+  email: z.email("Escribe un email válido."),
+});
+
 export const adminUserSchema = z
   .object({
     fullName: personNameSchema,

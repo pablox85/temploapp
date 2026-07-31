@@ -2,7 +2,8 @@
 
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
-import { superAdminTenantSchema } from "@/lib/validation";
+import { getPasswordRecoveryRedirectUrl } from "@/lib/auth/password-recovery";
+import { passwordRecoveryRequestSchema, superAdminTenantSchema } from "@/lib/validation";
 
 type TenantField = "tenantName" | "adminName" | "email" | "password" | "confirmPassword";
 
@@ -18,6 +19,10 @@ export type CreateTenantResult =
       message: string;
       fieldErrors?: Partial<Record<TenantField, string>>;
     };
+
+export type GenerateSuperAdminPasswordRecoveryLinkResult =
+  | { success: true; message: string; link: string }
+  | { success: false; message: string; fieldError?: string };
 
 async function rollbackProvisioning({
   admin,
@@ -143,5 +148,75 @@ export async function createTenantWithAdminAction(
     message: "Templo y administrador creados correctamente.",
     tenant: { id: provisioned.tenant_id, name: provisioned.name },
     administrator: { id: createdUserId, fullName: parsed.data.adminName },
+  };
+}
+
+export async function generateSuperAdminPasswordRecoveryLinkAction(
+  _previousState: GenerateSuperAdminPasswordRecoveryLinkResult,
+  formData: FormData,
+): Promise<GenerateSuperAdminPasswordRecoveryLinkResult> {
+  const sessionClient = await createClient();
+  const { data: authData, error: authError } = await sessionClient.auth.getUser();
+
+  if (authError || !authData.user) {
+    return { success: false, message: "Sesión expirada. Inicia sesión nuevamente." };
+  }
+
+  const { data: isSuperAdmin, error: authorizationError } = await sessionClient.rpc("is_super_admin");
+  if (authorizationError || isSuperAdmin !== true) {
+    return { success: false, message: "No tienes permisos para restablecer contraseñas." };
+  }
+
+  const parsed = passwordRecoveryRequestSchema.safeParse({
+    email: formData.get("email"),
+  });
+  if (!parsed.success) {
+    return {
+      success: false,
+      message: "Revisa el email ingresado.",
+      fieldError: parsed.error.issues[0]?.message,
+    };
+  }
+
+  const redirectTo = getPasswordRecoveryRedirectUrl();
+  if (!redirectTo) {
+    return {
+      success: false,
+      message: "Falta configurar la URL pública para recuperar contraseñas.",
+    };
+  }
+
+  if (process.env.NEXT_PUBLIC_USE_DEMO_DATA === "true") {
+    return {
+      success: false,
+      message: "La recuperación de contraseña no está disponible en modo demo.",
+    };
+  }
+
+  let admin: ReturnType<typeof createAdminClient>;
+  try {
+    admin = createAdminClient();
+  } catch {
+    return { success: false, message: "Error inesperado del servidor." };
+  }
+
+  const { data: generatedLink, error: generatedLinkError } = await admin.auth.admin.generateLink({
+    type: "recovery",
+    email: parsed.data.email,
+    options: { redirectTo },
+  });
+  const actionLink = generatedLink.properties?.action_link;
+
+  if (generatedLinkError || !actionLink) {
+    return {
+      success: false,
+      message: "No se pudo generar el enlace de recuperación para ese usuario.",
+    };
+  }
+
+  return {
+    success: true,
+    message: "Enlace de recuperación generado. Compártelo de forma segura.",
+    link: actionLink,
   };
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ShieldIcon, LogOutIcon } from "@/components/icons";
 import { Brand } from "@/components/brand";
+import { SuperAdminPasswordRecoveryForm } from "@/components/superadmin-password-recovery-form";
 import { SuperAdminTenantForm } from "@/components/superadmin-tenant-form";
 import { superAdminSignOutAction } from "@/app/(superadmin)/superadmin/login/actions";
 import { requireSuperAdmin } from "@/lib/auth/super-admin";
@@ -36,13 +37,22 @@ export default async function NewTenantPage() {
             <p className="mt-8 max-w-md rounded-xl border border-white/10 bg-white/4 px-4 py-3 text-sm leading-6 text-slate-400">EL administrador se crea con acceso confirmado y queda viculado a su lugar de trabajo.</p>
           </section>
 
-          <section className="page-transition rounded-2xl border border-slate-800 bg-slate-900/80 p-5 shadow-2xl shadow-black/20 backdrop-blur sm:p-8">
-            <div className="mb-7 border-b border-slate-800 pb-5">
-              <h2 className="text-xl font-semibold text-white">Datos del templo</h2>
-              <p className="mt-1 text-sm text-slate-400">Completa los datos para continuar.</p>
-            </div>
-            <SuperAdminTenantForm />
-          </section>
+          <div className="space-y-6">
+            <section className="page-transition rounded-2xl border border-slate-800 bg-slate-900/80 p-5 shadow-2xl shadow-black/20 backdrop-blur sm:p-8">
+              <div className="mb-7 border-b border-slate-800 pb-5">
+                <h2 className="text-xl font-semibold text-white">Datos del templo</h2>
+                <p className="mt-1 text-sm text-slate-400">Completa los datos para continuar.</p>
+              </div>
+              <SuperAdminTenantForm />
+            </section>
+            <section className="page-transition rounded-2xl border border-slate-800 bg-slate-900/80 p-5 shadow-xl shadow-black/15 backdrop-blur sm:p-8">
+              <div className="mb-5 border-b border-slate-800 pb-5">
+                <h2 className="text-xl font-semibold text-white">Restablecer contraseña</h2>
+                <p className="mt-1 text-sm leading-6 text-slate-400">Acción global disponible únicamente para SuperAdmin.</p>
+              </div>
+              <SuperAdminPasswordRecoveryForm />
+            </section>
+          </div>
         </div>
       </div>
     </main>
